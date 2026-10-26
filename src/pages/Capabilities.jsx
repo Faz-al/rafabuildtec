@@ -1,221 +1,240 @@
-import React from "react";
+import React, { useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
+import { ArrowDownRight, ArrowRight, Check } from "lucide-react";
 import { Navbar, Footer } from "../components/Layout";
-import { useRef } from "react";
 
-/*
-CAPABILITIES PAGE — EXECUTION LED · INSTITUTIONAL · PREMIUM
-DESKTOP LOCKED — MOBILE POLISH ONLY
-*/
+const ease = [0.22, 1, 0.36, 1];
+
+const reveal = {
+  hidden: { opacity: 0, y: 22 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.75, ease } },
+};
+
+const domains = [
+  {
+    number: "01",
+    title: "Healthcare & Institutional",
+    summary:
+      "Hospitals, medical colleges and diagnostic centres requiring careful coordination, regulatory awareness and dependable delivery.",
+    descriptor: "Complex environments",
+  },
+  {
+    number: "02",
+    title: "Educational Campuses",
+    summary:
+      "Academic and residential campuses planned around operational continuity, phased construction and the needs of active environments.",
+    descriptor: "Phased delivery",
+  },
+  {
+    number: "03",
+    title: "Industrial & Logistics",
+    summary:
+      "Manufacturing and logistics facilities supported by coordinated civil, structural and safety-led execution.",
+    descriptor: "Performance-led spaces",
+  },
+  {
+    number: "04",
+    title: "Public Infrastructure & EPC",
+    summary:
+      "Government and public-sector works managed with structured documentation, accountability and project governance.",
+    descriptor: "Governed execution",
+  },
+];
+
+const executionSteps = [
+  {
+    number: "01",
+    title: "Pre-construction",
+    desc: "Feasibility, statutory planning, budgeting, sequencing and early risk identification.",
+    detail: "Plan with clarity",
+  },
+  {
+    number: "02",
+    title: "Engineering & controls",
+    desc: "Design coordination, BOQs, procurement strategy and programme control.",
+    detail: "Coordinate the details",
+  },
+  {
+    number: "03",
+    title: "Execution & safety",
+    desc: "Site execution systems, safety leadership, inspections and progress governance.",
+    detail: "Manage delivery",
+  },
+  {
+    number: "04",
+    title: "Handover & lifecycle",
+    desc: "Testing, commissioning, documentation and long-term asset readiness.",
+    detail: "Close with confidence",
+  },
+];
+
+const controlItems = [
+  "Regulatory approvals & statutory compliance",
+  "Risk registers & audit-ready documentation",
+  "Quality assurance & inspection systems",
+  "Health, safety & workforce governance",
+];
+
+function Eyebrow({ children, light = false }) {
+  return (
+    <p
+      className={`mb-4 text-[10px] font-medium uppercase tracking-[0.26em] sm:text-[11px] sm:tracking-[0.3em] ${
+        light ? "text-[#C5A77D]" : "text-[#947650]"
+      }`}
+    >
+      {children}
+    </p>
+  );
+}
 
 export default function Capabilities() {
   return (
-    <div className="bg-[#EDEEF0] text-[#1F2933] overflow-x-hidden">
+    <main className="min-h-screen overflow-x-clip bg-[#F4F2ED] text-[#252A26]">
       <Navbar />
-
       <Hero />
       <CapabilityIntro />
       <CapabilityDomains />
       <ExecutionFramework />
       <ControlsSection />
       <ClosingStatement />
-
       <Footer />
-    </div>
+    </main>
   );
 }
 
-/* ================= HERO ================= */
 function Hero() {
   return (
-    <section className="pt-40 md:pt-60 pb-24 md:pb-44">
-      <div className="max-w-7xl mx-auto px-6 md:px-12">
-        <motion.p
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="text-[10px] md:text-[11px] uppercase tracking-[0.35em] md:tracking-[0.4em] text-[#8A6F4E] mb-6 md:mb-8"
+    <section className="relative px-5 pb-16 pt-32 sm:px-8 sm:pt-36 md:px-12 md:pb-24 md:pt-44 lg:pt-48">
+      <div className="mx-auto max-w-[1440px]">
+        <motion.div
+          initial="hidden"
+          animate="show"
+          variants={{ hidden: {}, show: { transition: { staggerChildren: 0.13 } } }}
+          className="grid gap-10 md:grid-cols-12 md:items-end md:gap-8"
         >
-          Capabilities
-        </motion.p>
+          <motion.div variants={reveal} className="md:col-span-8">
+            <Eyebrow>Capabilities / Delivery approach</Eyebrow>
+            <h1 className="max-w-5xl text-[clamp(2.55rem,6.2vw,5.9rem)] font-normal leading-[0.98] tracking-[-0.055em]">
+              The capability to build.
+              <br />
+              <span className="text-[#8C8B80]">The discipline to deliver.</span>
+            </h1>
+          </motion.div>
+          <motion.div variants={reveal} className="md:col-span-4 md:pb-2 md:pl-5">
+            <p className="max-w-md text-[14px] leading-7 text-[#5C625D] sm:text-[15px] sm:leading-8">
+              RafaBuildTec brings planning, engineering coordination and site execution
+              together in a structured approach to complex construction environments.
+            </p>
+            <a
+              href="#capability-domains"
+              className="mt-6 inline-flex items-center gap-3 border-b border-[#947650]/60 pb-2 text-[10px] font-medium uppercase tracking-[0.19em] transition-colors hover:text-[#947650]"
+            >
+              Explore capabilities <ArrowDownRight size={14} strokeWidth={1.5} />
+            </a>
+          </motion.div>
+        </motion.div>
 
-        <motion.h1
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1 }}
-          className="text-[34px] md:text-[72px] font-light leading-tight md:leading-[1.05] max-w-5xl"
-        >
-          Delivery capabilities
-          <br />
-          <span className="font-medium">engineered for certainty</span>
-        </motion.h1>
-
-        <motion.p
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3, duration: 0.8 }}
-          className="mt-8 md:mt-12 text-[#4B5563] leading-relaxed md:leading-loose max-w-xl md:max-w-2xl"
-        >
-          RafaBuildTec’s capabilities are structured around execution control,
-          regulatory compliance, and predictable outcomes across complex
-          institutional environments.
-        </motion.p>
+        <div className="mt-12 flex items-center gap-4 border-t border-[#303432]/15 pt-4 md:mt-20">
+          <span className="h-1.5 w-1.5 rounded-full bg-[#947650]" />
+          <p className="text-[9px] uppercase tracking-[0.2em] text-[#77766F] sm:text-[10px] sm:tracking-[0.24em]">
+            Planning · Engineering · Execution · Governance
+          </p>
+          <span className="ml-auto font-mono text-[10px] text-[#77766F]">RBT / 02</span>
+        </div>
       </div>
     </section>
   );
 }
 
-/* ================= INTRO ================= */
-/* ================= INTRO ================= */
-/* ================= INTRO ================= */
 function CapabilityIntro() {
   return (
-    <section className="py-24 md:py-40 bg-[#E6E8EB]">
-      <div className="max-w-6xl mx-auto px-6 md:px-12">
-
-        {/* ================= MOBILE ================= */}
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7 }}
-          viewport={{ once: true }}
-          className="md:hidden text-center"
-        >
-          <h2 className="text-[24px] font-light leading-snug max-w-[22rem] mx-auto">
+    <section className="bg-[#EAE7DF] px-5 py-16 sm:px-8 md:px-12 md:py-24">
+      <motion.div
+        initial="hidden"
+        whileInView="show"
+        viewport={{ once: true, margin: "-80px" }}
+        variants={{ hidden: {}, show: { transition: { staggerChildren: 0.14 } } }}
+        className="mx-auto grid max-w-[1440px] gap-8 md:grid-cols-12 md:items-start md:gap-12"
+      >
+        <motion.div variants={reveal} className="md:col-span-7">
+          <Eyebrow>Our approach</Eyebrow>
+          <h2 className="max-w-3xl text-[clamp(1.95rem,4vw,3.7rem)] leading-[1.04] tracking-[-0.045em]">
             Capabilities are not service lists.
             <br />
-            They are delivery systems.
+            <span className="text-[#8C8B80]">They are delivery systems.</span>
           </h2>
-
-          <p className="mt-6 text-[14px] text-[#4B5563] leading-relaxed max-w-[24rem] mx-auto">
-            Each capability reflects how we plan, control, and execute projects
-            where regulatory oversight, safety, coordination complexity, and
-            long-term performance are critical.
-          </p>
         </motion.div>
-
-        {/* ================= DESKTOP (LOCKED) ================= */}
-        <div className="hidden md:block">
-          <motion.h2
-            initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
-            className="text-[42px] font-light leading-snug max-w-4xl mb-10"
-          >
-            Capabilities are not service lists.
-            <br />
-            They are delivery systems.
-          </motion.h2>
-
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2, duration: 0.7 }}
-            viewport={{ once: true }}
-            className="text-[#4B5563] leading-loose max-w-3xl"
-          >
-            Each capability reflects how we plan, control, and execute projects
-            where regulatory oversight, safety, coordination complexity, and
-            long-term performance are critical.
-          </motion.p>
-        </div>
-
-      </div>
+        <motion.div variants={reveal} className="md:col-span-5 md:pt-9">
+          <p className="text-[13px] leading-7 text-[#5C625D] sm:text-[14px] sm:leading-8">
+            Each capability reflects how we plan, coordinate and execute work where
+            regulatory oversight, safety, multiple stakeholders and long-term performance
+            matter. The focus is on bringing structure to complexity—from early planning
+            through to handover.
+          </p>
+          <div className="mt-7 h-px w-14 bg-[#947650]" />
+        </motion.div>
+      </motion.div>
     </section>
   );
 }
 
-
-
-/* ================= DOMAINS ================= */
-/* ================= DOMAINS ================= */
 function CapabilityDomains() {
-  const domains = [
-    {
-      title: "Healthcare & Institutional",
-      summary:
-        "Hospitals, medical colleges, diagnostic centres with strict regulatory oversight and complex MEP coordination.",
-    },
-    {
-      title: "Educational Campuses",
-      summary:
-        "Academic and residential campuses delivered under live-environment constraints and phased execution.",
-    },
-    {
-      title: "Industrial & Logistics",
-      summary:
-        "Manufacturing plants and logistics facilities with heavy civil, structural, and safety-led execution.",
-    },
-    {
-      title: "Public Infrastructure & EPC",
-      summary:
-        "Government and public-sector works executed with audit-ready documentation and EPC governance.",
-    },
-  ];
-
   return (
-    <section className="py-20 md:py-36">
-      <div className="max-w-7xl mx-auto px-6 md:px-12">
-        <motion.h3
-          initial={{ opacity: 0, y: 16 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7 }}
-          viewport={{ once: true }}
-          className="text-[30px] md:text-[44px] font-light mb-10 md:mb-24"
+    <section id="capability-domains" className="px-5 py-16 sm:px-8 md:px-12 md:py-28">
+      <div className="mx-auto max-w-[1440px]">
+        <motion.div
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, margin: "-80px" }}
+          variants={{ hidden: {}, show: { transition: { staggerChildren: 0.12 } } }}
+          className="mb-9 grid gap-5 md:mb-14 md:grid-cols-12 md:items-end"
         >
-          Capability domains
-        </motion.h3>
+          <motion.div variants={reveal} className="md:col-span-7">
+            <Eyebrow>01 / Sectors</Eyebrow>
+            <h2 className="text-[clamp(1.9rem,3.9vw,3.5rem)] leading-[1.04] tracking-[-0.045em]">
+              Built around the
+              <br className="hidden sm:block" /> demands of each sector.
+            </h2>
+          </motion.div>
+          <motion.p variants={reveal} className="max-w-md text-[13px] leading-7 text-[#5C625D] md:col-span-5 md:justify-self-end">
+            Different environments require different priorities. Our delivery approach
+            adapts to the operating, coordination and compliance needs of each project.
+          </motion.p>
+        </motion.div>
 
-        {/* ================= MOBILE ================= */}
-        <div className="space-y-6 md:hidden">
-          {domains.map((d, i) => (
-            <motion.div
-              key={d.title}
-              initial={{ opacity: 0, y: 12 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: i * 0.05 }}
-              viewport={{ once: true }}
-              className="relative pl-5"
+        <div className="grid grid-cols-1 border-t border-[#303432]/20 sm:grid-cols-2">
+          {domains.map((domain, index) => (
+            <motion.article
+              key={domain.number}
+              initial="hidden"
+              whileInView="show"
+              viewport={{ once: true, margin: "-40px" }}
+              variants={reveal}
+              className={`group relative flex min-h-[230px] flex-col justify-between border-b border-[#303432]/20 py-7 sm:min-h-[255px] sm:px-6 sm:py-8 md:min-h-[285px] md:px-8 md:py-10 ${
+                index % 2 === 0 ? "sm:border-r sm:border-[#303432]/20 sm:pl-0" : "sm:pr-0"
+              }`}
             >
-              {/* Vertical Accent */}
-              <span className="absolute left-0 top-0 h-full w-[2px] bg-[#8A6F4E]/40" />
-
-              <h4 className="text-[17px] font-light mb-1">
-                {d.title}
-              </h4>
-
-              <p className="text-[13px] text-[#4B5563] leading-relaxed max-w-md">
-                {d.summary}
-              </p>
-            </motion.div>
-          ))}
-        </div>
-
-        {/* ================= DESKTOP (LOCKED) ================= */}
-        <div className="hidden md:grid md:grid-cols-2 gap-x-24 gap-y-20">
-          {domains.map((d, i) => (
-            <motion.div
-              key={d.title}
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, delay: i * 0.12 }}
-              viewport={{ once: true }}
-              whileHover={{ y: -6 }}
-              className="relative bg-[#F7F8FA] rounded-[24px] px-12 py-10 shadow-[0_20px_40px_rgba(0,0,0,0.12)]"
-            >
-              <span className="absolute left-0 top-0 h-full w-[2px] bg-[#8A6F4E]/40 rounded-l-[24px]" />
-
-              <h4 className="text-[24px] font-light mb-4">
-                {d.title}
-              </h4>
-
-              <p className="text-[#4B5563] leading-relaxed text-sm max-w-lg">
-                {d.summary}
-              </p>
-
-              <div className="mt-6 h-[2px] w-14 bg-[#8A6F4E]/40" />
-            </motion.div>
+              <div className="flex items-start justify-between gap-4">
+                <span className="font-mono text-[10px] tracking-wide text-[#947650]">
+                  {domain.number}
+                </span>
+                <span className="text-[9px] uppercase tracking-[0.16em] text-[#8C8B80]">
+                  {domain.descriptor}
+                </span>
+              </div>
+              <div className="mt-8">
+                <h3 className="max-w-sm text-[22px] leading-tight tracking-[-0.03em] text-[#252A26] transition-colors group-hover:text-[#947650] sm:text-[24px]">
+                  {domain.title}
+                </h3>
+                <p className="mt-3 max-w-lg text-[13px] leading-7 text-[#5C625D]">
+                  {domain.summary}
+                </p>
+              </div>
+              <div className="mt-6 flex items-center justify-between">
+                <span className="h-px w-9 bg-[#947650]/60 transition-all duration-300 group-hover:w-16" />
+                <ArrowDownRight size={16} className="text-[#947650] opacity-70 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:translate-y-0.5" />
+              </div>
+            </motion.article>
           ))}
         </div>
       </div>
@@ -223,222 +242,159 @@ function CapabilityDomains() {
   );
 }
 
-
-/* ================= EXECUTION ================= */
 function ExecutionFramework() {
-  const steps = [
-    {
-      index: "01",
-      title: "Pre-Construction",
-      desc: "Feasibility, statutory planning, budgeting, sequencing and risk identification.",
-    },
-    {
-      index: "02",
-      title: "Engineering & Controls",
-      desc: "Design coordination, BOQs, procurement strategy, and programme control.",
-    },
-    {
-      index: "03",
-      title: "Execution & Safety",
-      desc: "Site execution systems, safety leadership, inspections and progress governance.",
-    },
-    {
-      index: "04",
-      title: "Handover & Lifecycle",
-      desc: "Testing, commissioning, documentation, and long-term asset readiness.",
-    },
-  ];
-
   const railRef = useRef(null);
-
-  // 🔹 Track horizontal scroll of the rail (mobile)
-  const { scrollXProgress } = useScroll({
-    container: railRef,
-  });
-
-  // 🔹 Convert scroll progress → line width
-  const mobileLineWidth = useTransform(
-    scrollXProgress,
-    [0, 1],
-    ["0%", "100%"]
-  );
+  const { scrollXProgress } = useScroll({ container: railRef });
+  const mobileLineWidth = useTransform(scrollXProgress, [0, 1], ["0%", "100%"]);
 
   return (
-    <section className="py-28 md:py-44 bg-[#E6E8EB] overflow-hidden">
-      <div className="max-w-7xl mx-auto px-6 md:px-12">
-
-        {/* ---------- HEADER ---------- */}
+    <section className="overflow-hidden bg-[#EAE7DF] px-5 py-16 sm:px-8 md:px-12 md:py-28">
+      <div className="mx-auto max-w-[1440px]">
         <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          viewport={{ once: true }}
-          className="max-w-3xl mb-16 md:mb-28"
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, margin: "-80px" }}
+          variants={{ hidden: {}, show: { transition: { staggerChildren: 0.12 } } }}
+          className="mb-10 grid gap-5 md:mb-16 md:grid-cols-12 md:items-end"
         >
-          <p className="text-[10px] md:text-[11px] uppercase tracking-[0.3em] text-[#8A6F4E] mb-4 md:mb-6">
-            Execution Framework
-          </p>
-          <h3 className="text-[30px] md:text-[44px] font-light leading-tight">
-            How projects move
-            <br />
-            from intent to delivery
-          </h3>
+          <motion.div variants={reveal} className="md:col-span-7">
+            <Eyebrow>02 / Execution framework</Eyebrow>
+            <h2 className="max-w-3xl text-[clamp(1.9rem,4vw,3.6rem)] leading-[1.04] tracking-[-0.045em]">
+              From intent
+              <br /> to considered delivery.
+            </h2>
+          </motion.div>
+          <motion.p variants={reveal} className="max-w-md text-[13px] leading-7 text-[#5C625D] md:col-span-5 md:justify-self-end">
+            A connected sequence of planning, coordination, execution and close-out helps
+            keep project priorities visible throughout delivery.
+          </motion.p>
         </motion.div>
 
-        {/* ---------- TIMELINE ---------- */}
         <div className="relative">
-
-          {/* Base line */}
-          <div className="absolute top-[22px] left-0 right-0 h-[2px] bg-[#8A6F4E]/25" />
-
-          {/* 🔹 DESKTOP animated line */}
+          <div className="absolute left-0 right-0 top-[17px] h-px bg-[#947650]/25" />
           <motion.div
             initial={{ width: 0 }}
             whileInView={{ width: "100%" }}
-            transition={{ duration: 2.6, ease: "easeInOut" }}
             viewport={{ once: true }}
-            className="absolute top-[22px] left-0 h-[2px] bg-[#8A6F4E] hidden md:block"
+            transition={{ duration: 1.8, ease: "easeInOut" }}
+            className="absolute left-0 top-[17px] hidden h-px bg-[#947650] md:block"
           />
-
-          {/* 🔹 MOBILE scroll-driven line */}
           <motion.div
             style={{ width: mobileLineWidth }}
-            className="absolute top-[22px] left-0 h-[2px] bg-[#8A6F4E] md:hidden"
+            className="absolute left-0 top-[17px] h-px bg-[#947650] md:hidden"
           />
 
-          {/* ---------- STEPS ---------- */}
           <div
             ref={railRef}
-            className="
-              relative flex gap-16
-              overflow-x-auto
-              pb-6
-              snap-x snap-mandatory
-              scrollbar-none
-              md:grid md:grid-cols-4 md:gap-24 md:overflow-visible
-            "
+            className="relative -mr-5 flex snap-x snap-mandatory gap-6 overflow-x-auto pb-5 pr-5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:-mr-8 sm:pr-8 md:mr-0 md:grid md:grid-cols-4 md:gap-8 md:overflow-visible md:pr-0"
           >
-            {steps.map((s, i) => (
-              <div
-                key={s.index}
-                className="
-                  snap-start
-                  min-w-[260px]
-                  md:min-w-0
-                "
-              >
-                {/* Dot */}
-                <span className="absolute top-[15px] h-4 w-4 rounded-full bg-[#8A6F4E]" />
-
-                {/* Content */}
-                <div className="mt-14">
-                  <p className="text-[26px] md:text-[36px] font-light text-[#8A6F4E]/40 mb-2 md:mb-4">
-                    {s.index}
-                  </p>
-                  <h4 className="text-[18px] md:text-[22px] font-light mb-3">
-                    {s.title}
-                  </h4>
-                  <p className="text-[#4B5563] text-[14px] md:text-sm leading-relaxed md:leading-loose">
-                    {s.desc}
+            {executionSteps.map((step) => (
+              <article key={step.number} className="w-[78vw] max-w-[300px] shrink-0 snap-start md:w-auto md:max-w-none">
+                <span className="relative z-[1] block h-[9px] w-[9px] rounded-full border-2 border-[#EAE7DF] bg-[#947650] ring-1 ring-[#947650]/60" />
+                <div className="mt-8 border-t border-[#303432]/15 pt-5 md:border-t-0 md:pt-0">
+                  <p className="font-mono text-[11px] text-[#947650]">{step.number}</p>
+                  <h3 className="mt-3 max-w-[220px] text-[20px] leading-tight tracking-[-0.025em] text-[#252A26]">
+                    {step.title}
+                  </h3>
+                  <p className="mt-3 text-[13px] leading-7 text-[#5C625D]">{step.desc}</p>
+                  <p className="mt-5 text-[9px] uppercase tracking-[0.18em] text-[#8C8B80]">
+                    {step.detail}
                   </p>
                 </div>
-              </div>
+              </article>
             ))}
           </div>
-
         </div>
+
+        <p className="mt-3 text-[9px] uppercase tracking-[0.18em] text-[#8C8B80] md:hidden">
+          Swipe to explore each stage
+        </p>
       </div>
     </section>
   );
 }
 
-
-/* ================= CONTROLS ================= */
 function ControlsSection() {
-  const items = [
-    "Regulatory approvals & statutory compliance",
-    "Risk registers & audit-ready documentation",
-    "Quality assurance & inspection systems",
-    "Health, safety & workforce governance",
-  ];
-
   return (
-    <section className="py-28 md:py-44">
-      <div className="max-w-6xl mx-auto px-6 md:px-12">
-        <h3 className="text-[30px] md:text-[42px] font-light mb-12 md:mb-20">
-          Control systems embedded
-        </h3>
+    <section className="px-5 py-16 sm:px-8 md:px-12 md:py-28">
+      <div className="mx-auto grid max-w-[1440px] gap-10 md:grid-cols-12 md:gap-12">
+        <motion.div
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, margin: "-80px" }}
+          variants={reveal}
+          className="md:col-span-5"
+        >
+          <Eyebrow>03 / Project governance</Eyebrow>
+          <h2 className="max-w-lg text-[clamp(1.9rem,3.7vw,3.35rem)] leading-[1.04] tracking-[-0.045em]">
+            Control is built into the process.
+          </h2>
+          <p className="mt-5 max-w-md text-[13px] leading-7 text-[#5C625D]">
+            Clear controls help teams maintain visibility, address risk and support
+            consistent standards from site activity to project documentation.
+          </p>
+        </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-20">
-          {items.map((item, i) => (
+        <div className="md:col-span-7">
+          {controlItems.map((item, index) => (
             <motion.div
               key={item}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, delay: i * 0.15 }}
-              viewport={{ once: true }}
-              className="relative pl-8 md:pl-12"
+              initial="hidden"
+              whileInView="show"
+              viewport={{ once: true, margin: "-30px" }}
+              variants={reveal}
+              className="flex gap-4 border-t border-[#303432]/15 py-5 sm:gap-6 sm:py-6"
             >
-              <span className="absolute left-0 top-1 h-full w-[2px] bg-[#8A6F4E]/40" />
-              <p className="text-[#4B5563] leading-relaxed md:leading-loose">
-                {item}
-              </p>
+              <span className="pt-1 font-mono text-[10px] text-[#947650]">
+                {String(index + 1).padStart(2, "0")}
+              </span>
+              <p className="flex-1 text-[14px] leading-6 text-[#3D443E] sm:text-[15px]">{item}</p>
+              <Check size={15} strokeWidth={1.4} className="mt-1 shrink-0 text-[#947650]" />
             </motion.div>
           ))}
+          <div className="border-t border-[#303432]/15" />
         </div>
       </div>
     </section>
   );
 }
 
-/* ================= CLOSE ================= */
-/* ================= CLOSE ================= */
 function ClosingStatement() {
   return (
-    <section className="py-28 md:py-40 bg-[#1F2933] text-white">
-      <div className="max-w-5xl mx-auto px-6 md:px-12 text-center">
-
-        {/* Eyebrow (very subtle authority cue) */}
-        <motion.p
-          initial={{ opacity: 0, y: 12 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          viewport={{ once: true }}
-          className="text-[10px] uppercase tracking-[0.35em] text-white/50 mb-6"
-        >
-          Execution Philosophy
-        </motion.p>
-
-        {/* Statement */}
-        <motion.h3
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.9, delay: 0.1 }}
-          viewport={{ once: true }}
-          className="
-            text-[30px] md:text-[44px]
-            font-light
-            leading-tight md:leading-snug
-            max-w-[22rem] md:max-w-none
-            mx-auto
-          "
-        >
-          Capability is not what we promise.
-          <br />
-          <span className="text-white/80">It’s what we control.</span>
-        </motion.h3>
-
-        {/* Subtle baseline divider */}
-        <motion.div
-          initial={{ width: 0, opacity: 0 }}
-          whileInView={{ width: "64px", opacity: 1 }}
-          transition={{ duration: 0.8, delay: 0.25 }}
-          viewport={{ once: true }}
-          className="mx-auto mt-10 h-[1px] bg-white/30"
-        />
-
-      </div>
+    <section className="bg-[#242925] px-5 py-16 text-[#F4F2ED] sm:px-8 md:px-12 md:py-24">
+      <motion.div
+        initial="hidden"
+        whileInView="show"
+        viewport={{ once: true, margin: "-80px" }}
+        variants={{ hidden: {}, show: { transition: { staggerChildren: 0.14 } } }}
+        className="mx-auto max-w-[1440px]"
+      >
+        <motion.div variants={reveal} className="grid gap-8 md:grid-cols-12 md:items-end">
+          <div className="md:col-span-8">
+            <Eyebrow light>Execution philosophy</Eyebrow>
+            <h2 className="max-w-4xl text-[clamp(2rem,5vw,4.7rem)] leading-[1] tracking-[-0.05em]">
+              Capability is not what we promise.
+              <br />
+              <span className="text-[#A7A79B]">It is what we control.</span>
+            </h2>
+          </div>
+          <div className="md:col-span-4 md:flex md:justify-end">
+            <a
+              href="/contact"
+              className="inline-flex min-h-12 items-center justify-between gap-8 border border-white/25 px-5 text-[10px] uppercase tracking-[0.18em] transition-colors hover:border-[#C5A77D] hover:bg-[#C5A77D] hover:text-[#242925]"
+            >
+              Discuss a project <ArrowRight size={15} />
+            </a>
+          </div>
+        </motion.div>
+        <motion.div variants={reveal} className="mt-10 flex items-center gap-4 border-t border-white/15 pt-4">
+          <span className="h-1.5 w-1.5 rounded-full bg-[#C5A77D]" />
+          <p className="text-[9px] uppercase tracking-[0.2em] text-white/50 sm:text-[10px] sm:tracking-[0.24em]">
+            Structured planning. Responsible execution.
+          </p>
+          <span className="ml-auto font-mono text-[10px] text-white/45">RBT / 03</span>
+        </motion.div>
+      </motion.div>
     </section>
   );
 }
-

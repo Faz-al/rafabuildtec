@@ -1,120 +1,539 @@
 import React, { useEffect, useState } from "react";
-import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
-import { Building2, ChevronLeft, ChevronRight } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
+import { ArrowDownRight, ArrowLeft, ArrowRight, X, Search, SlidersHorizontal } from "lucide-react";
 import { sanityClient } from "../lib/sanity";
+import { Navbar, Footer } from "../components/Layout";
 
-/*
-PROJECTS PAGE
-LOCKED DESIGN + SANITY CMS
-*/
+const PAGE_SIZE = 3;
+const ease = [0.22, 1, 0.36, 1];
 
-/*
-PROJECTS PAGE
-Flagship mobile version -- brat update
-*/
-function MobileFlagshipProjects({ projects }) {
-  const [index, setIndex] = React.useState(0);
+const reveal = {
+  hidden: { opacity: 0, y: 22 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.75, ease } },
+};
 
-  if (!projects || projects.length === 0) return null;
+function Eyebrow({ children, light = false }) {
+  return (
+    <p
+      className={`mb-4 text-[10px] font-medium uppercase tracking-[0.28em] sm:text-[11px] sm:tracking-[0.32em] ${
+        light ? "text-[#C5A77D]" : "text-[#947650]"
+      }`}
+    >
+      {children}
+    </p>
+  );
+}
+
+function ProjectImage({ project, className = "", imageClassName = "" }) {
+  const src = project?.images?.[0];
+
+  if (!src) {
+    return (
+      <div
+        className={`flex items-center justify-center bg-[#E5E1D8] ${className}`}
+        aria-label={`No image available for ${project?.title || "project"}`}
+      >
+        <span className="text-[10px] uppercase tracking-[0.25em] text-[#827B70]">
+          Project imagery
+        </span>
+      </div>
+    );
+  }
+
+  return (
+    <div className={`overflow-hidden bg-[#E5E1D8] ${className}`}>
+      <img
+        src={src}
+        alt={project?.title || "RafaBuildTec project"}
+        loading="lazy"
+        className={`h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.035] ${imageClassName}`}
+      />
+    </div>
+  );
+}
+
+function MobileFlagshipProjects({ projects, onOpen }) {
+  const [index, setIndex] = useState(0);
+  const [imageIndex, setImageIndex] = useState(0);
+
+  useEffect(() => {
+    setIndex(0);
+    setImageIndex(0);
+  }, [projects.length]);
+
+  if (!projects?.length) return null;
 
   const current = projects[index];
-  if (!current) return null;
-
-  const paginate = (direction) => {
-    setIndex((i) => (i + direction + projects.length) % projects.length);
+  const images = current?.images || [];
+  const imageCount = images.length;
+  const moveProject = (direction) => {
+    setIndex((value) => (value + direction + projects.length) % projects.length);
+    setImageIndex(0);
+  };
+  const moveImage = (direction) => {
+    if (imageCount < 2) return;
+    setImageIndex((value) => (value + direction + imageCount) % imageCount);
   };
 
   return (
     <div className="md:hidden">
-      {/* IMAGE — SWIPE ENABLED */}
-      {current.images?.[0] && (
+      <div className="group relative">
         <motion.div
-          key={index}
-          drag="x"
+          key={`${current.title || index}-${imageIndex}`}
+          drag={projects.length > 1 ? "x" : false}
           dragConstraints={{ left: 0, right: 0 }}
-          dragElastic={0.25}
-          onDragEnd={(e, info) => {
-            const swipePower = info.offset.x * info.velocity.x;
-
-            if (swipePower < -600) paginate(1);
-            if (swipePower > 600) paginate(-1);
-
+          dragElastic={0.12}
+          onDragEnd={(_, info) => {
+            if (Math.abs(info.offset.x) > 65) {
+              if (imageCount > 1) moveImage(info.offset.x < 0 ? 1 : -1);
+              else moveProject(info.offset.x < 0 ? 1 : -1);
+            }
           }}
-          initial={{ opacity: 0.6, x: 40 }}
+          initial={{ opacity: 0, x: 12 }}
           animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0.6, x: -40 }}
-          transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-          className="rounded-[28px] overflow-hidden cursor-grab active:cursor-grabbing"
+          transition={{ duration: 0.35, ease }}
+          className="relative cursor-grab active:cursor-grabbing"
         >
-          <img
-            src={current.images[0]}
-            alt={current.title}
-            className="w-full h-[220px] object-contain"
-          />
+          <div className="relative aspect-[4/3] w-full overflow-hidden bg-[#DCD7CD]">
+            {images[imageIndex] ? (
+              <img
+                src={images[imageIndex]}
+                alt={`${current.title || "Project"} — image ${imageIndex + 1}`}
+                loading="lazy"
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <div className="flex h-full items-center justify-center text-[10px] uppercase tracking-[0.25em] text-[#827B70]">
+                Project imagery
+              </div>
+            )}
+            <div className="absolute inset-0 bg-gradient-to-t from-[#171A18]/35 via-transparent to-transparent" />
+            <span className="absolute bottom-4 left-4 text-[9px] uppercase tracking-[0.2em] text-white/90">
+              {current.location || "Selected project"}
+            </span>
+            {imageCount > 1 && (
+              <div className="absolute bottom-3 right-3 flex items-center gap-1.5">
+                <span className="mr-1 rounded-sm bg-black/35 px-2 py-1.5 font-mono text-[10px] text-white backdrop-blur-sm">
+                  {String(imageIndex + 1).padStart(2, "0")} / {String(imageCount).padStart(2, "0")}
+                </span>
+                <button
+                  type="button"
+                  onClick={(event) => { event.stopPropagation(); moveImage(-1); }}
+                  aria-label="Previous image of this project"
+                  className="flex h-9 w-9 items-center justify-center border border-white/65 bg-black/30 text-white backdrop-blur-sm transition-colors hover:bg-white hover:text-[#252A26]"
+                >
+                  <ArrowLeft size={15} />
+                </button>
+                <button
+                  type="button"
+                  onClick={(event) => { event.stopPropagation(); moveImage(1); }}
+                  aria-label="Next image of this project"
+                  className="flex h-9 w-9 items-center justify-center border border-white/65 bg-black/30 text-white backdrop-blur-sm transition-colors hover:bg-white hover:text-[#252A26]"
+                >
+                  <ArrowRight size={15} />
+                </button>
+              </div>
+            )}
+          </div>
         </motion.div>
-      )}
 
-      {/* CONTENT */}
-      <div className="mt-6">
-        <p className="text-[10px] uppercase tracking-[0.35em] text-[#8A6F4E] mb-2">
-          {current.location}
-        </p>
+        <div className="mt-3 flex items-center justify-between gap-3 border-b border-[#303432]/15 pb-3">
+          <span className="text-[9px] uppercase tracking-[0.16em] text-[#77766F]">
+            {imageCount > 1 ? "Swipe image or use arrows" : "Featured project"}
+          </span>
+          <span className="font-mono text-[10px] text-[#77766F]">
+            Project {String(index + 1).padStart(2, "0")} / {String(projects.length).padStart(2, "0")}
+          </span>
+        </div>
+      </div>
 
-        <h4 className="text-[22px] font-light mb-3">
+      <div className="pt-6">
+        <Eyebrow>{current.location || "Project location"}</Eyebrow>
+        <h3 className="max-w-xl text-[27px] font-normal leading-[1.12] tracking-[-0.035em] text-[#222724]">
           {current.title}
-        </h4>
-
-        <p className="text-[#6B7280] text-sm mb-4">
-          {current.category}
+        </h3>
+        <p className="mt-3 text-[12px] tracking-wide text-[#77766F]">
+          {current.category || "Project"}{current.scale ? `  /  ${current.scale}` : ""}
         </p>
+        {current.description && (
+          <p className="mt-5 text-[14px] leading-7 text-[#5C625D]">{current.description}</p>
+        )}
+        <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-4">
+          <button
+            type="button"
+            onClick={() => onOpen(current)}
+            className="inline-flex items-center gap-3 border-b border-[#947650] pb-2 text-[10px] font-medium uppercase tracking-[0.2em] text-[#343A35] transition-colors hover:text-[#947650]"
+          >
+            Explore project <ArrowRight size={14} strokeWidth={1.5} />
+          </button>
+          {projects.length > 1 && (
+            <button
+              type="button"
+              onClick={() => moveProject(1)}
+              className="inline-flex items-center gap-2 pb-2 text-[10px] font-medium uppercase tracking-[0.16em] text-[#77766F] transition-colors hover:text-[#947650]"
+            >
+              Next project <ArrowRight size={14} />
+            </button>
+          )}
+        </div>
+      </div>
 
-        <p className="text-[#4B5563] leading-relaxed text-[14px]">
-          {current.description}
+      {projects.length > 1 && (
+        <div className="mt-7 border-t border-[#303432]/15 pt-4">
+          <div className="mb-3 flex items-center justify-between">
+            <span className="text-[9px] uppercase tracking-[0.18em] text-[#77766F]">More selected work</span>
+            <span className="text-[10px] text-[#77766F]">Swipe to explore</span>
+          </div>
+          <div className="flex gap-2 overflow-x-auto pb-2">
+            {projects.map((project, i) => (
+              <button
+                type="button"
+                key={`${project.title}-${i}`}
+                onClick={() => { setIndex(i); setImageIndex(0); }}
+                aria-label={`View project ${project.title}`}
+                aria-current={i === index ? "true" : undefined}
+                className={`min-w-[132px] max-w-[170px] flex-1 border px-3 py-3 text-left transition-colors ${
+                  i === index ? "border-[#947650] bg-white/60" : "border-[#303432]/15 bg-transparent"
+                }`}
+              >
+                <span className="block font-mono text-[9px] text-[#947650]">{String(i + 1).padStart(2, "0")}</span>
+                <span className="mt-2 block text-[11px] leading-snug text-[#303432]">{project.title}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function FlagshipProjectSelector({ projects, onOpen }) {
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [imageIndex, setImageIndex] = useState(0);
+
+  useEffect(() => {
+    setActiveIndex(0);
+    setImageIndex(0);
+  }, [projects.length]);
+
+  if (!projects?.length) return null;
+
+  const current = projects[Math.min(activeIndex, projects.length - 1)];
+  const images = current?.images || [];
+  const imageCount = images.length;
+  const moveImage = (direction) => {
+    if (imageCount < 2) return;
+    setImageIndex((value) => (value + direction + imageCount) % imageCount);
+  };
+  const selectProject = (index) => {
+    setActiveIndex(index);
+    setImageIndex(0);
+  };
+
+  return (
+    <div className="hidden md:grid md:grid-cols-12 md:gap-7 lg:gap-9">
+      <div className="md:col-span-4">
+        <div className="border-t border-[#303432]/20">
+          {projects.map((project, index) => (
+            <button
+              type="button"
+              key={`${project.title}-${index}`}
+              onMouseEnter={() => selectProject(index)}
+              onFocus={() => selectProject(index)}
+              onClick={() => selectProject(index)}
+              className={`group flex w-full items-start gap-4 border-b border-[#303432]/15 py-4 text-left transition-opacity ${
+                activeIndex === index ? "opacity-100" : "opacity-55 hover:opacity-85"
+              }`}
+            >
+              <span className="pt-1 font-mono text-[10px] text-[#947650]">{String(index + 1).padStart(2, "0")}</span>
+              <span className="min-w-0 flex-1">
+                <span className="mb-2 block text-[9px] uppercase tracking-[0.2em] text-[#77766F]">{project.location || "Location"}</span>
+                <span className="block text-[15px] leading-snug tracking-[-0.02em] text-[#252A26] lg:text-[16px]">{project.title}</span>
+                <span className={`mt-3 block h-px transition-all duration-500 ${activeIndex === index ? "w-12 bg-[#947650]" : "w-5 bg-[#303432]/25"}`} />
+              </span>
+              <ArrowDownRight size={15} className={`mt-1 shrink-0 transition-transform ${activeIndex === index ? "translate-x-0.5 translate-y-0.5 text-[#947650]" : "text-[#77766F]"}`} />
+            </button>
+          ))}
+        </div>
+        <p className="mt-5 max-w-xs text-[12px] leading-6 text-[#77766F]">
+          Select a project to explore its story. Use the image arrows to browse its photography.
         </p>
       </div>
 
-      {/* INDICATOR */}
-      <div className="mt-8 flex justify-center gap-2">
-        {projects.map((_, i) => (
-          <span
-            key={i}
-            className={`h-[4px] rounded-full transition-all duration-300 ${
-              i === index
-                ? "w-8 bg-[#8A6F4E]"
-                : "w-4 bg-[#8A6F4E]/30"
-            }`}
-          />
-        ))}
+      <div className="md:col-span-8">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={`${current.title || activeIndex}-${imageIndex}`}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -6 }}
+            transition={{ duration: 0.35, ease }}
+            className="group"
+          >
+            <div className="relative">
+              <button type="button" onClick={() => onOpen(current)} className="block w-full text-left" aria-label={`View details for ${current.title}`}>
+                <div className="relative aspect-[1.55/1] max-h-[370px] overflow-hidden bg-[#DCD7CD]">
+                  {images[imageIndex] ? (
+                    <img src={images[imageIndex]} alt={`${current.title} — image ${imageIndex + 1}`} loading="lazy" className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.015]" />
+                  ) : (
+                    <div className="flex h-full items-center justify-center text-[10px] uppercase tracking-[0.25em] text-[#827B70]">Project imagery</div>
+                  )}
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#171A18]/40 via-transparent to-transparent" />
+                  <span className="absolute bottom-5 left-5 text-[9px] uppercase tracking-[0.22em] text-white/90">{current.location || "Selected project"}</span>
+                </div>
+              </button>
+
+              {imageCount > 1 && (
+                <div className="absolute bottom-3 right-3 z-10 flex items-center gap-1.5">
+                  <span className="mr-1 bg-black/35 px-2.5 py-2 font-mono text-[10px] text-white backdrop-blur-sm">
+                    Image {String(imageIndex + 1).padStart(2, "0")} / {String(imageCount).padStart(2, "0")}
+                  </span>
+                  <button type="button" onClick={() => moveImage(-1)} aria-label="Previous image of this project" className="flex h-9 w-9 items-center justify-center border border-white/65 bg-black/30 text-white backdrop-blur-sm transition-colors hover:bg-white hover:text-[#252A26]">
+                    <ArrowLeft size={15} strokeWidth={1.4} />
+                  </button>
+                  <button type="button" onClick={() => moveImage(1)} aria-label="Next image of this project" className="flex h-9 w-9 items-center justify-center border border-white/65 bg-black/30 text-white backdrop-blur-sm transition-colors hover:bg-white hover:text-[#252A26]">
+                    <ArrowRight size={15} strokeWidth={1.4} />
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {imageCount > 1 && (
+              <div className="mt-3 flex items-center justify-between gap-4">
+                <p className="text-[9px] uppercase tracking-[0.16em] text-[#77766F]">Browse project images</p>
+                <div className="flex gap-1.5">
+                  {images.map((image, i) => (
+                    <button
+                      key={`${current.title}-image-${i}`}
+                      type="button"
+                      onClick={() => setImageIndex(i)}
+                      aria-label={`Show image ${i + 1} of ${current.title}`}
+                      aria-current={i === imageIndex ? "true" : undefined}
+                      className={`h-[3px] transition-all duration-300 ${i === imageIndex ? "w-8 bg-[#947650]" : "w-4 bg-[#303432]/20 hover:bg-[#947650]/60"}`}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="grid grid-cols-12 gap-4 pt-5">
+              <div className="col-span-7">
+                <p className="mb-2 text-[10px] uppercase tracking-[0.22em] text-[#947650]">{current.category || "Featured project"}</p>
+                <h3 className="text-[21px] font-normal leading-tight tracking-[-0.035em] text-[#252A26] lg:text-[24px]">{current.title}</h3>
+                {current.scale && <p className="mt-3 text-[11px] tracking-wide text-[#77766F]">{current.scale}</p>}
+              </div>
+              <div className="col-span-5">
+                <p className="text-[13px] leading-7 text-[#5C625D]">{current.description || "A considered approach to planning, coordination and project delivery."}</p>
+                <button type="button" onClick={() => onOpen(current)} className="mt-4 inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.18em] text-[#343A35] transition-colors hover:text-[#947650]">
+                  View project <ArrowRight size={13} />
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        </AnimatePresence>
       </div>
     </div>
   );
 }
 
+function OtherProjectRow({ project, index, onOpen }) {
+  return (
+    <motion.article
+      variants={reveal}
+      className="group grid grid-cols-1 gap-4 border-t border-[#303432]/15 py-7 transition-colors duration-300 hover:bg-white/35 md:grid-cols-12 md:items-center md:gap-8 md:px-4 md:py-8"
+    >
+      <div className="flex items-start gap-4 md:col-span-1">
+        <span className="font-mono text-[10px] text-[#947650]">
+          {String(index + 1).padStart(2, "0")}
+        </span>
+        <span className="mt-1 hidden h-px w-5 bg-[#303432]/20 md:block" />
+      </div>
 
+      <div className="md:col-span-5">
+        <p className="mb-2 text-[9px] uppercase tracking-[0.22em] text-[#947650]">
+          {project.location || "Project location"}
+        </p>
+        <button
+          type="button"
+          onClick={() => onOpen(project)}
+          className="text-left text-[18px] leading-tight tracking-[-0.03em] text-[#252A26] transition-colors hover:text-[#947650] sm:text-[21px]"
+        >
+          {project.title}
+        </button>
+        <p className="mt-2 text-[11px] text-[#77766F]">
+          {project.category || "Project"}
+          {project.scale ? `  /  ${project.scale}` : ""}
+        </p>
+      </div>
 
+      <p className="text-[13px] leading-7 text-[#5C625D] md:col-span-4">
+        {project.description || "Planned and delivered with attention to coordination, quality and long-term performance."}
+      </p>
 
+      <div className="md:col-span-2 md:flex md:justify-end">
+        <button
+          type="button"
+          onClick={() => onOpen(project)}
+          className="inline-flex items-center gap-3 border-b border-[#947650]/60 pb-2 text-[9px] uppercase tracking-[0.18em] text-[#343A35] transition-colors hover:border-[#947650] hover:text-[#947650]"
+        >
+          View details <ArrowRight size={13} />
+        </button>
+      </div>
+    </motion.article>
+  );
+}
 
+function ProjectModal({ project, onClose }) {
+  const [imageIndex, setImageIndex] = useState(0);
+  const images = project?.images || [];
+
+  useEffect(() => {
+    setImageIndex(0);
+  }, [project]);
+
+  useEffect(() => {
+    if (!project) return undefined;
+    const onKeyDown = (event) => {
+      if (event.key === "Escape") onClose();
+      if (event.key === "ArrowRight" && images.length > 1) {
+        setImageIndex((value) => (value + 1) % images.length);
+      }
+      if (event.key === "ArrowLeft" && images.length > 1) {
+        setImageIndex((value) => (value - 1 + images.length) % images.length);
+      }
+    };
+    document.addEventListener("keydown", onKeyDown);
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      document.body.style.overflow = "";
+    };
+  }, [project, images.length, onClose]);
+
+  if (!project) return null;
+
+  return (
+    <AnimatePresence>
+      <motion.div
+        key="project-modal"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        onMouseDown={(event) => {
+          if (event.target === event.currentTarget) onClose();
+        }}
+        className="fixed inset-0 z-[100] flex items-end justify-center bg-[#171A18]/75 backdrop-blur-sm md:items-center md:p-6"
+        role="dialog"
+        aria-modal="true"
+        aria-label={`${project.title} project details`}
+      >
+        <motion.div
+          initial={{ y: 28, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          exit={{ y: 20, opacity: 0 }}
+          transition={{ duration: 0.35, ease }}
+          className="relative flex max-h-[94dvh] w-full flex-col overflow-hidden border border-white/20 bg-[#F4F2ED] shadow-2xl md:max-w-6xl md:flex-row"
+        >
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close project details"
+            className="absolute right-4 top-4 z-10 flex h-10 w-10 items-center justify-center border border-[#303432]/15 bg-[#F4F2ED]/90 text-[#303432] backdrop-blur transition-colors hover:bg-[#303432] hover:text-white"
+          >
+            <X size={17} strokeWidth={1.5} />
+          </button>
+
+          <div className="relative flex min-h-[230px] items-center justify-center bg-[#E5E1D8] md:min-h-[540px] md:w-[56%]">
+            {images.length ? (
+              <img
+                src={images[imageIndex]}
+                alt={`${project.title} — image ${imageIndex + 1}`}
+                className="h-full max-h-[46dvh] w-full object-contain md:absolute md:inset-0 md:max-h-none"
+              />
+            ) : (
+              <span className="text-[10px] uppercase tracking-[0.25em] text-[#827B70]">Project imagery</span>
+            )}
+
+            {images.length > 1 && (
+              <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between">
+                <span className="bg-[#F4F2ED]/90 px-3 py-2 font-mono text-[10px] text-[#303432]">
+                  {String(imageIndex + 1).padStart(2, "0")} / {String(images.length).padStart(2, "0")}
+                </span>
+                <div className="flex gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => setImageIndex((value) => (value - 1 + images.length) % images.length)}
+                    aria-label="Previous image"
+                    className="flex h-9 w-9 items-center justify-center bg-[#F4F2ED] text-[#303432] hover:bg-[#303432] hover:text-white"
+                  >
+                    <ArrowLeft size={15} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setImageIndex((value) => (value + 1) % images.length)}
+                    aria-label="Next image"
+                    className="flex h-9 w-9 items-center justify-center bg-[#F4F2ED] text-[#303432] hover:bg-[#303432] hover:text-white"
+                  >
+                    <ArrowRight size={15} />
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="overflow-y-auto px-6 py-8 sm:px-9 md:w-[44%] md:px-10 md:py-14">
+            <Eyebrow>{project.location || "Project details"}</Eyebrow>
+            <h2 className="max-w-md text-[28px] leading-[1.08] tracking-[-0.04em] text-[#252A26] sm:text-[34px]">
+              {project.title}
+            </h2>
+            <p className="mt-4 text-[11px] uppercase tracking-[0.12em] text-[#77766F]">
+              {project.category || "Project"}
+            </p>
+            {project.scale && (
+              <p className="mt-2 text-[11px] text-[#77766F]">{project.scale}</p>
+            )}
+            <div className="my-7 h-px w-12 bg-[#947650]" />
+            <p className="whitespace-pre-line text-[13px] leading-7 text-[#5C625D]">
+              {project.description || "Further project information will be added soon."}
+            </p>
+            <p className="mt-10 border-t border-[#303432]/15 pt-4 text-[9px] uppercase tracking-[0.2em] text-[#77766F]">
+              RafaBuildTec LLP · Selected work
+            </p>
+          </div>
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
+  );
+}
+
+function ProjectsLoadingState() {
+  return (
+    <div className="grid gap-5 md:grid-cols-3">
+      {[1, 2, 3].map((item) => (
+        <div key={item} className="animate-pulse">
+          <div className="aspect-[4/3] bg-[#E5E1D8]" />
+          <div className="mt-5 h-2 w-24 bg-[#DAD5CB]" />
+          <div className="mt-3 h-5 w-3/4 bg-[#DAD5CB]" />
+          <div className="mt-3 h-2 w-full bg-[#DAD5CB]" />
+        </div>
+      ))}
+    </div>
+  );
+}
 
 export default function Projects() {
   const [mainProjects, setMainProjects] = useState([]);
   const [otherProjects, setOtherProjects] = useState([]);
-  const [active, setActive] = useState(null);
-
-  // progressive reveal state (IMPORTANT)
-
-    const PAGE_SIZE = 3;
-const [page, setPage] = useState(0);
-
-const totalPages = Math.ceil(otherProjects.length / PAGE_SIZE);
-
-const visibleProjects = otherProjects.slice(
-  page * PAGE_SIZE,
-  page * PAGE_SIZE + PAGE_SIZE
-);
-
+  const [activeProject, setActiveProject] = useState(null);
+  const [page, setPage] = useState(0);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [activeCategory, setActiveCategory] = useState("All");
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
 
   useEffect(() => {
+    let mounted = true;
+
     sanityClient
       .fetch(`
         *[_type == "project" && published == true] | order(order asc) {
@@ -128,845 +547,354 @@ const visibleProjects = otherProjects.slice(
         }
       `)
       .then((data) => {
-        setMainProjects(
-          data.filter(
-            (p) => p.projectType?.toLowerCase() === "main"
-          )
-        );
-
-        setOtherProjects(
-          data.filter(
-            (p) => p.projectType?.toLowerCase() === "other"
-          )
-        );
+        if (!mounted) return;
+        const projects = Array.isArray(data) ? data : [];
+        setMainProjects(projects.filter((project) => project.projectType?.toLowerCase() === "main"));
+        setOtherProjects(projects.filter((project) => project.projectType?.toLowerCase() === "other"));
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error("Unable to load projects from Sanity:", error);
+        if (!mounted) return;
+        setLoadError(true);
+        setLoading(false);
       });
+
+    return () => {
+      mounted = false;
+    };
   }, []);
 
+  const categories = ["All", ...new Set(otherProjects.map((project) => project.category).filter(Boolean))];
+  const filteredProjects = otherProjects.filter((project) => {
+    const query = searchTerm.trim().toLowerCase();
+    const matchesSearch = !query || [
+      project.title, project.location, project.category, project.scale, project.description,
+    ].some((value) => String(value || "").toLowerCase().includes(query));
+    const matchesCategory = activeCategory === "All" || project.category === activeCategory;
+    return matchesSearch && matchesCategory;
+  });
+  const totalPages = Math.ceil(filteredProjects.length / PAGE_SIZE);
+  const visibleProjects = filteredProjects.slice(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE);
 
+  const changePage = (nextPage) => {
+    setPage(Math.max(0, Math.min(nextPage, Math.max(totalPages - 1, 0))));
+  };
 
-
+  const updateSearch = (value) => {
+    setSearchTerm(value);
+    setPage(0);
+  };
+  const updateCategory = (value) => {
+    setActiveCategory(value);
+    setPage(0);
+  };
 
   return (
-    <div className="bg-[#EDEEF0] text-[#1F2933]  overflow-x-hidden">
+    <main className="min-h-screen overflow-x-clip bg-[#F4F2ED] text-[#252A26]">
       <Navbar />
 
-      {/* -------------------HERO ----------------------------*/}
-<section className="pt-32 pb-24 md:pt-60 md:pb-60">
-  <motion.div
-    className="max-w-7xl mx-auto px-5 md:px-12"
-    initial="hidden"
-    whileInView="show"
-    viewport={{ once: true, margin: "-100px" }}
-    variants={{
-      hidden: {},
-      show: {
-        transition: {
-          staggerChildren: 0.15,
-        },
-      },
-    }}
-  >
-    <motion.p
-      variants={{
-        hidden: { opacity: 0, y: 20 },
-        show: { opacity: 1, y: 0 },
-      }}
-      transition={{ duration: 0.8, ease: "easeOut" }}
-      className="text-[10px] md:text-[11px] uppercase tracking-[0.35em] text-[#8A6F4E] mb-4 md:mb-6"
-    >
-      Track Record
-    </motion.p>
-
-    <motion.h1
-      variants={{
-        hidden: { opacity: 0, y: 24 },
-        show: { opacity: 1, y: 0 },
-      }}
-      transition={{ duration: 0.9, ease: "easeOut" }}
-      className="text-[34px] sm:text-[42px] md:text-[64px] font-light leading-tight max-w-full md:max-w-4xl"
-    >
-      Projects Delivered with <br />
-      <span className="font-medium">Execution Certainty</span>
-    </motion.h1>
-
-    <motion.p
-      variants={{
-        hidden: { opacity: 0, y: 20 },
-        show: { opacity: 1, y: 0 },
-      }}
-      transition={{ duration: 0.8, ease: "easeOut", delay: 0.05 }}
-      className="mt-6 md:mt-8 text-[#4B5563] leading-relaxed md:leading-loose max-w-full md:max-w-2xl text-[14px] md:text-base"
-    >
-      Our portfolio reflects disciplined delivery across healthcare,
-      institutional, industrial, and infrastructure projects.
-    </motion.p>
-  </motion.div>
-</section>
-
-
-
-      {/* FLAGSHIP PROJECTS — HOMEPAGE GRADE */}
-{/* FLAGSHIP PROJECTS — HOMEPAGE GRADE */}
-<section className="bg-[#E6E8EB] pt-14 pb-16 md:pt-20 md:pb-20">
-  <motion.div
-    className="max-w-[1400px] mx-auto px-5 md:px-12"
-    initial="hidden"
-    whileInView="show"
-    viewport={{ once: true, margin: "-100px" }}
-    variants={{
-      hidden: {},
-      show: {
-        transition: {
-          staggerChildren: 0.15,
-        },
-      },
-    }}
-  >
-    <motion.p
-      variants={{
-        hidden: { opacity: 0, y: 18 },
-        show: { opacity: 1, y: 0 },
-      }}
-      transition={{ duration: 0.7, ease: "easeOut" }}
-      className="text-[10px] md:text-[11px] uppercase tracking-[0.35em] text-[#8A6F4E] mb-4 md:mb-6"
-    >
-      Flagship Engagements
-    </motion.p>
-
-    <motion.h3
-      variants={{
-        hidden: { opacity: 0, y: 24 },
-        show: { opacity: 1, y: 0 },
-      }}
-      transition={{ duration: 0.9, ease: "easeOut" }}
-      className="text-[28px] sm:text-[34px] md:text-[48px] font-light mb-6 md:mb-4 max-w-full md:max-w-4xl"
-    >
-      Large-scale projects executed with discipline,
-      clarity, and long-term responsibility.
-    </motion.h3>
-
-    {/* KEEP THIS UNANIMATED */}
-    <div className="mt-8 md:mt-12">
-  {/* MOBILE */}
-  <MobileFlagshipProjects projects={mainProjects} />
-
-  {/* DESKTOP — KEEP EXACT */}
-  <div className="hidden md:block">
-    <FlagshipProjectSelector projects={mainProjects} />
-  </div>
-</div>
-
-  </motion.div>
-</section>
-
-
-
-
-
-{/* OTHER KEY PROJECTS — REFINED + LUXURY (STABLE) */}
-{/* OTHER KEY PROJECTS — EXTENDED PORTFOLIO (ENTERPRISE-GRADE) */}
-<section className="py-20 md:py-36 bg-[#EDEEF0]">
-  <motion.div
-    className="max-w-7xl mx-auto px-5 md:px-12"
-    initial="hidden"
-    whileInView="show"
-    viewport={{ once: true, margin: "-100px" }}
-    variants={{
-      hidden: {},
-      show: { transition: { staggerChildren: 0.12 } },
-    }}
-  >
-    {/* LABEL */}
-    <motion.p
-      initial={{ opacity: 0, y: 18 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.7, ease: "easeOut" }}
-      className="text-[10px] md:text-[11px] uppercase tracking-[0.35em] text-[#8A6F4E] mb-4 md:mb-6"
-    >
-      Extended Portfolio
-    </motion.p>
-
-    {/* TITLE */}
-    <motion.h3
-      initial={{ opacity: 0, y: 24 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.9, ease: "easeOut" }}
-      className="text-[26px] sm:text-[30px] md:text-[40px] font-light mb-16 md:mb-24 max-w-full md:max-w-3xl"
-    >
-      Additional projects delivered with the same
-      discipline, engineering rigor, and execution standards.
-    </motion.h3>
-
-    {/* PROJECT LIST */}
-    <motion.div
-  drag="x"
-  dragConstraints={{ left: 0, right: 0 }}
-  dragElastic={0.15}
-  onDragEnd={(e, info) => {
-    if (info.offset.x < -80 && page < totalPages - 1) {
-      setPage((p) => p + 1);
-    }
-    if (info.offset.x > 80 && page > 0) {
-      setPage((p) => p - 1);
-    }
-  }}
-  className="space-y-6 md:space-y-24"
->
-      {visibleProjects.map((p, i) => (
-        <motion.div
-          key={i}
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, ease: "easeOut" }}
-        >
-          {/* MOBILE — CARD */}
-          <div className="md:hidden">
-            <details className="rounded-2xl bg-[#F2F3F5] px-6 py-5 shadow-[0_10px_30px_rgba(0,0,0,0.06)]">
-              <summary className="list-none cursor-pointer">
-                <p className="text-[10px] uppercase tracking-[0.35em] text-[#8A6F4E] mb-2">
-                  {p.location}
-                </p>
-                <h4 className="text-[18px] font-medium mb-2">
-                  {p.title}
-                </h4>
-                <p className="text-[#6B7280] text-[13px]">
-                  {p.category}
-                </p>
-              </summary>
-
-              <div className="mt-4 pt-4 border-t border-black/10">
-                <p className="text-[#4B5563] leading-relaxed text-[14px]">
-                  {p.description}
-                </p>
-
-                <button
-                  onClick={() => setActive(p)}
-                  className="mt-4 text-xs uppercase tracking-widest text-[#8A6F4E]"
-                >
-                  View Project
-                </button>
-              </div>
-            </details>
-          </div>
-
-          {/* DESKTOP — ORIGINAL HOVER ROW (RESTORED) */}
-          <div
-            onClick={() => setActive(p)}
-            className="
-  hidden md:grid md:grid-cols-12 gap-16 items-center
-  cursor-pointer group
-  transition-all duration-500 ease-out
-  hover:translate-x-[2px]
-"
-
-          >
-            {/* LEFT */}
-            <div className="md:col-span-7">
-              <p className="text-[11px] uppercase tracking-[0.35em] text-[#8A6F4E] mb-4">
-                {p.location}
-              </p>
-
-              <h4 className="text-[26px] font-medium mb-4 transition-colors duration-500 group-hover:text-black">
-                {p.title}
-              </h4>
-
-              <p className="text-[#6B7280] text-sm mb-6">
-                {p.category}
-              </p>
-
-              <div className="h-[2px] w-16 bg-[#8A6F4E]/30 transition-all duration-700 group-hover:w-28 group-hover:bg-[#8A6F4E]/60" />
-            </div>
-
-            {/* RIGHT */}
-            <div className="md:col-span-5">
-              <p className="text-[#4B5563] leading-loose max-w-md transition-opacity duration-500 group-hover:opacity-90">
-                {p.description}
-              </p>
-            </div>
-          </div>
-
-          
-
-
-
-        </motion.div>
-
-        
-      ))}
-    </motion.div>
-
-
-    
-   
-  </motion.div>
-  {/* PAGINATION — SINGLE INSTANCE */}
-<div className="mt-24 flex flex-col items-center gap-6">
-
-  {/* PROGRESS BAR */}
-  <div className="w-[320px] md:w-[420px] h-[2px] bg-black/10 rounded-full overflow-hidden">
-    <motion.div
-      animate={{
-        width: `${((page + 1) / totalPages) * 100}%`,
-      }}
-      transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-      className="h-full bg-[#8A6F4E]"
-    />
-  </div>
-
-  {/* COUNT */}
-  <div className="text-[10px] uppercase tracking-[0.45em] text-[#6B7280]">
-    {Math.min((page + 1) * PAGE_SIZE, otherProjects.length)} of {otherProjects.length} projects
-  </div>
-
-  {/* CONTROLS */}
-  <div className="flex items-center gap-16">
-    <button
-      onClick={() => setPage((p) => Math.max(p - 1, 0))}
-      disabled={page === 0}
-      className="text-xs uppercase tracking-[0.35em] text-[#8A6F4E] disabled:opacity-30"
-    >
-      ← Previous
-    </button>
-
-    <button
-      onClick={() => setPage((p) => Math.min(p + 1, totalPages - 1))}
-      disabled={page === totalPages - 1}
-      className="text-xs uppercase tracking-[0.35em] text-[#8A6F4E] disabled:opacity-30"
-    >
-      Next →
-    </button>
-  </div>
-
-  <p className="text-[10px] uppercase tracking-[0.4em] text-[#9CA3AF]">
-    Swipe or drag to navigate
-  </p>
-</div>
-
-
-
-  {active && (
-    <ProjectModal
-      project={active}
-      onClose={() => setActive(null)}
-    />
-  )}
-</section>
-
-
-
-
-
-      {/* CTA — WITH EMAIL INPUT (ANIMATED, SAFE) */}
-<section className="py-24 md:py-44 bg-[#F2F3F5]">
-  <motion.div
-    className="max-w-6xl mx-auto px-5 md:px-12 grid md:grid-cols-12 gap-16 md:gap-20 items-start md:items-center"
-    initial="hidden"
-    whileInView="show"
-    viewport={{ once: true, margin: "-100px" }}
-    variants={{
-      hidden: {},
-      show: { transition: { staggerChildren: 0.15 } },
-    }}
-  >
-    {/* LEFT — TEXT */}
-    <motion.div
-      className="md:col-span-7"
-      variants={{
-        hidden: { opacity: 0, y: 24 },
-        show: { opacity: 1, y: 0 },
-      }}
-      transition={{ duration: 0.8, ease: "easeOut" }}
-    >
-      <p className="text-[10px] md:text-[11px] uppercase tracking-[0.35em] text-[#8A6F4E] mb-4 md:mb-6">
-        Next Step
-      </p>
-
-      <h3 className="text-[28px] sm:text-[32px] md:text-[42px] font-light leading-tight mb-6 md:mb-8">
-        Planning a Complex Project?
-      </h3>
-
-      <p className="text-[#4B5563] leading-relaxed md:leading-loose max-w-full md:max-w-xl text-[14px] md:text-base">
-        Engage our leadership and engineering team to assess scope,
-        feasibility, execution strategy, and risk alignment.
-      </p>
-    </motion.div>
-
-    {/* RIGHT — CONTACT CARD */}
-    <motion.div
-      className="md:col-span-5"
-      variants={{
-        hidden: { opacity: 0, y: 32 },
-        show: { opacity: 1, y: 0 },
-      }}
-      transition={{ duration: 0.9, ease: "easeOut" }}
-    >
-      <div className="
-        bg-white
-        rounded-[24px] md:rounded-[32px]
-        p-8 sm:p-10 md:p-16
-        shadow-[0_24px_60px_rgba(0,0,0,0.14)]
-      ">
-        <p className="text-[13px] md:text-sm text-[#6B7280] mb-6 md:mb-8">
-          Project enquiries & institutional discussions
-        </p>
-
-        <p className="text-[16px] md:text-[18px] mb-2">
-          projects@rafabuildtec.com
-        </p>
-        <p className="text-[16px] md:text-[18px] mb-6 md:mb-8">
-          +91 XXX XXX XXXX
-        </p>
-
-        {/* EMAIL INPUT */}
-        <div className="mt-4 md:mt-6">
-          <p className="text-[10px] uppercase tracking-widest text-[#6B7280] mb-3 md:mb-4">
-            Or leave your email
-          </p>
-
-          <div className="flex flex-col gap-3">
-            <input
-              type="email"
-              placeholder="your@email.com"
-              className="
-                w-full px-5 py-3
-                rounded-full
-                border border-black/10
-                text-sm
-                focus:outline-none
-                focus:ring-2 focus:ring-[#8A6F4E]/30
-              "
-            />
-            <button className="
-              w-full
-              px-6 py-3
-              rounded-full
-              bg-[#1F2933]
-              text-white
-              text-sm
-              hover:bg-black
-              transition
-            ">
-              Submit
-            </button>
-          </div>
-        </div>
-
-        <div className="mt-8 md:mt-10 h-[2px] w-16 md:w-20 bg-[#8A6F4E]/40" />
-      </div>
-    </motion.div>
-  </motion.div>
-</section>
-
-
-
-      <EnterpriseFooter />
-    </div>
-  );
-}
-
-/* ---------------- NAVBAR ---------------- */
-function Navbar() {
-  const [open, setOpen] = React.useState(false);
-
-  return (
-    <motion.nav
-      initial={{ y: -20, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-      className="fixed top-0 w-full z-50"
-    >
-      {/* background */}
-      <div className="absolute inset-0 bg-[#EDEEF0]/90 backdrop-blur-xl border-b border-black/5" />
-
-      <div className="relative z-20 max-w-7xl mx-auto px-4 md:px-12 py-4 flex justify-between items-center">
-
-        
-        {/* LOGO */}
-        <Link
-          to="/"
-          className="flex items-center gap-2 text-[14px] md:text-[15px] font-medium whitespace-nowrap"
-        >
-          <Building2 size={18} className="text-[#8A6F4E]" />
-          RafaBuildTec LLP
-        </Link>
-
-        {/* DESKTOP NAV */}
-        <div className="hidden md:flex items-center gap-16 text-[11px] uppercase tracking-[0.32em] text-[#5F6C7B]">
-          {[
-            { label: "Company", path: "/company" },
-            { label: "Capabilities", path: "/capabilities" },
-            { label: "Projects", path: "/projects" },
-            { label: "Leadership", path: "/leadership" },
-            { label: "Contact", path: "/contact" },
-          ].map((item) => (
-            <Link key={item.path} to={item.path} className="relative group">
-              <span className="group-hover:text-black transition">
-                {item.label}
-              </span>
-              <span className="absolute left-1/2 -bottom-2 h-[1.5px] w-0 bg-[#8A6F4E] transition-all duration-300 group-hover:w-full group-hover:left-0" />
-            </Link>
-          ))}
-        </div>
-
-        {/* MOBILE MENU BUTTON */}
-        <button
-          onClick={() => setOpen(!open)}
-          className="md:hidden flex items-center justify-center w-9 h-9 rounded-full border border-black/10"
-        >
-          <span className="sr-only">Menu</span>
-          <div className="space-y-1.5">
-            <span className="block w-4 h-[1.5px] bg-black" />
-            <span className="block w-4 h-[1.5px] bg-black" />
-            <span className="block w-4 h-[1.5px] bg-black" />
-          </div>
-        </button>
-      </div>
-
-      {/* MOBILE DROPDOWN */}
-      {open && (
-        <motion.div
-          initial={{ opacity: 0, y: -8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, ease: "easeOut" }}
-          className="md:hidden relative z-30 bg-[#EDEEF0] border-t border-black/5"
-        >
-
-          <div className="px-6 py-6 space-y-6 text-[12px] uppercase tracking-[0.35em] text-[#5F6C7B]">
-            {[
-              { label: "Company", path: "/company" },
-              { label: "Capabilities", path: "/capabilities" },
-              { label: "Projects", path: "/projects" },
-              { label: "Leadership", path: "/leadership" },
-              { label: "Contact", path: "/contact" },
-            ].map((item) => (
-              <Link
-                key={item.path}
-                to={item.path}
-                onClick={() => setOpen(false)}
-                className="block"
-              >
-                {item.label}
-              </Link>
-            ))}
-          </div>
-        </motion.div>
-      )}
-    </motion.nav>
-  );
-}
-
-
-
-/* ---------------- PROJECT BLOCK ---------------- */
-function FlagshipProjectSelector({ projects }) {
-  const [active, setActive] = useState(0);
-
-  return (
-    <div className="grid md:grid-cols-12 gap-2 items-center">
-      {/* LEFT — HOVER SELECTOR */}
-      <div className="md:col-span-4 space-y-10">
-        {projects.map((project, index) => (
-          <div
-            key={index}
-            onMouseEnter={() => setActive(index)}
-            onClick={() => setActive(index)}
-            className={`cursor-pointer transition ${
-              active === index
-                ? "opacity-100"
-                : "opacity-40 hover:opacity-70"
-            }`}
-          >
-            <p className="text-[10px] uppercase tracking-[0.35em] text-[#8A6F4E] mb-2">
-              {project.location}
-            </p>
-
-            <h4 className="text-[20px] font-light leading-snug">
-              {project.title}
-            </h4>
-
-            <div
-              className={`mt-4 h-[2px] transition-all duration-500 ${
-                active === index
-                  ? "w-20 bg-[#8A6F4E]"
-                  : "w-10 bg-[#8A6F4E]/30"
-              }`}
-            />
-          </div>
-        ))}
-      </div>
-
-      {/* RIGHT — VISUAL STAGE */}
-      <div className="md:col-span-8 relative h-[460px]">
-        {projects.map((project, index) => (
-          <motion.div
-            key={index}
-            initial={false}
-            animate={{
-              opacity: index === active ? 1 : 0,
-              y: index === active ? 0 : 16,
-            }}
-            transition={{ duration: 0.7, ease: "easeOut" }}
-            className="absolute inset-0 grid md:grid-cols-12 gap-16 items-center"
-          >
-            {/* IMAGE — COMPOSED, NOT CROPPED */}
-            <div className="md:col-span-7">
-              {project.images?.[0] && (
-                <div className="relative w-full h-[360px] overflow-hidden">
-  <motion.img
-    src={project.images[0]}
-    alt={project.title}
-    initial={{ scale: 1.03 }}
-    animate={{ scale: index === active ? 1 : 1.03 }}
-    transition={{ duration: 0.8, ease: "easeOut" }}
-    className="w-full h-full object-contain rounded-[2px]
-               shadow-[0_28px_70px_rgba(0,0,0,0.18)]"
-  />
-</div>
-
-              )}
-            </div>
-
-            {/* CONTENT */}
-            <div className="md:col-span-5">
-              <p className="text-[#6B7280] text-sm mb-2">
-              {project.category}
-              </p>
-
-            {project.scale && (
-           <p className="text-[#6B7280] text-sm mb-6">
-           {project.scale}
-          </p>
-          )}
-
-              <p className="text-[#4B5563] leading-loose max-w-md">
-                {project.description}
-              </p>
-
-              <div className="mt-10 h-[2px] w-20 bg-[#8A6F4E]/40" />
-            </div>
-          </motion.div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-
-
-
-/* ---------------- PREMIUM MODAL ---------------- */
-function ProjectModal({ project, onClose }) {
-  const [index, setIndex] = useState(0);
-  const images = project.images || [];
-  const total = images.length;
-
-  return (
-    <motion.div
-      className="fixed inset-0 z-[999] bg-black/70 backdrop-blur-sm"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-    >
-      {/* FULLSCREEN MODAL */}
-      <motion.div
-        drag="y"
-        dragConstraints={{ top: 0, bottom: 0 }}
-        dragElastic={0.2}
-        onDragEnd={(e, info) => {
-          if (info.offset.y > 120 || info.velocity.y > 800) {
-            onClose();
-          }
-        }}
-        initial={{ y: 120 }}
-        animate={{ y: 0 }}
-        exit={{ y: 120 }}
-        transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-        className="
-          absolute inset-0 md:inset-auto md:relative
-          md:mx-auto md:my-12 md:max-w-5xl md:h-auto
-          bg-white
-          rounded-none md:rounded-[36px]
-          overflow-hidden
-          shadow-[0_50px_140px_rgba(0,0,0,0.55)]
-          flex flex-col
-        "
-      >
-        {/* DRAG HANDLE (MOBILE) */}
-        <div className="md:hidden flex justify-center py-3">
-          <div className="h-[4px] w-12 rounded-full bg-black/20" />
-        </div>
-
-        {/* IMAGE STAGE — MOMENTUM SWIPE */}
-        <motion.div
-          key={index}
-          drag="x"
-          dragConstraints={{ left: 0, right: 0 }}
-          dragElastic={0.15}
-          onDragEnd={(e, info) => {
-            const swipe = info.offset.x * info.velocity.x;
-            if (swipe < -700) setIndex((i) => (i + 1) % total);
-            if (swipe > 700) setIndex((i) => (i - 1 + total) % total);
-          }}
-          className="relative flex-shrink-0 h-[55vh] md:h-[420px] bg-[#ECEEF1] cursor-grab active:cursor-grabbing"
-        >
-          <motion.img
-            src={images[index]}
-            alt={project.title}
-            initial={{ opacity: 0.6, scale: 1.04 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.55, ease: "easeOut" }}
-            className="w-full h-full object-contain"
+      {/* Cinematic portfolio hero */}
+      <section className="relative isolate overflow-hidden bg-[#252A26] pt-[62px] text-[#F4F2ED] sm:pt-[68px]">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_72%_35%,#77786F_0%,#444943_34%,#252A26_75%)]">
+          <img
+            src="https://images.unsplash.com/photo-1511818966892-d7d671e672a2?auto=format&fit=crop&w=2400&q=85"
+            alt=""
+            aria-hidden="true"
+            fetchPriority="high"
+            className="h-full w-full object-cover object-center opacity-60"
           />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#171A18]/90 via-[#171A18]/55 to-[#171A18]/15" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#171A18]/70 via-transparent to-[#171A18]/20" />
+        </div>
 
-          {/* CLOSE */}
-          <button
-            onClick={onClose}
-            className="
-              absolute top-4 right-4
-              bg-white/90 backdrop-blur-md
-              px-3 py-1.5 rounded-full
-              text-xs text-[#1F2933]
-              shadow-md
-            "
+        <div aria-hidden="true" className="pointer-events-none absolute inset-[14px] border border-white/15 sm:inset-6" />
+        <div aria-hidden="true" className="pointer-events-none absolute right-[12%] top-0 hidden h-full w-px bg-white/15 lg:block" />
+
+        <div className="relative mx-auto flex min-h-[430px] max-w-[1240px] flex-col justify-between px-7 pb-7 pt-12 sm:min-h-[480px] sm:px-10 sm:pb-9 sm:pt-16 lg:min-h-[510px] lg:px-12 lg:pb-10 lg:pt-20">
+          <motion.div
+            initial="hidden"
+            animate="show"
+            variants={{ hidden: {}, show: { transition: { staggerChildren: 0.12 } } }}
+            className="flex items-start justify-between gap-6"
           >
-            Close
-          </button>
-
-          {/* DESKTOP NAV */}
-          {total > 1 && (
-            <>
-              <button
-                onClick={() => setIndex((i) => (i - 1 + total) % total)}
-                className="hidden md:flex absolute left-6 top-1/2 -translate-y-1/2 bg-white/90 p-3 rounded-full shadow-md"
-              >
-                <ChevronLeft />
-              </button>
-              <button
-                onClick={() => setIndex((i) => (i + 1) % total)}
-                className="hidden md:flex absolute right-6 top-1/2 -translate-y-1/2 bg-white/90 p-3 rounded-full shadow-md"
-              >
-                <ChevronRight />
-              </button>
-            </>
-          )}
-        </motion.div>
-
-        {/* CONTENT */}
-        <div className="flex-1 overflow-y-auto px-6 py-8 md:px-20 md:py-16 grid md:grid-cols-12 gap-8 md:gap-16">
-          {/* LEFT */}
-          <div className="md:col-span-7">
-            <p className="text-[10px] uppercase tracking-[0.35em] text-[#8A6F4E] mb-3">
-              {project.location}
-            </p>
-
-            <h3 className="text-[22px] md:text-[32px] font-medium mb-4">
-              {project.title}
-            </h3>
-
-            <p className="text-[#6B7280] text-sm mb-2">
-              {project.category}
-            </p>
-
-            {project.scale && (
-              <p className="text-[#6B7280] text-sm mb-6">
-                {project.scale}
+            <motion.div variants={reveal}>
+              <p className="flex items-center gap-3 text-[9px] font-medium uppercase tracking-[0.28em] text-[#D5BD9B] sm:text-[10px]">
+                <span className="h-px w-8 bg-[#C5A77D]" />
+                RafaBuildTec LLP
               </p>
-            )}
+            </motion.div>
+            <motion.p variants={reveal} className="hidden max-w-[180px] text-right text-[9px] uppercase leading-5 tracking-[0.2em] text-white/75 sm:block">
+              Construction
+              <br />
+              & Infrastructure
+            </motion.p>
+          </motion.div>
 
-            <div className="h-[2px] w-20 bg-[#8A6F4E]/40" />
+          <div className="grid items-end gap-8 lg:grid-cols-12 lg:gap-10">
+            <motion.div
+              initial={{ opacity: 0, y: 18 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.75, delay: 0.1, ease }}
+              className="lg:col-span-8"
+            >
+              <p className="mb-4 text-[9px] font-medium uppercase tracking-[0.25em] text-[#D5BD9B] sm:mb-5 sm:text-[10px]">
+                Selected work / Portfolio
+              </p>
+              <h1 className="max-w-[800px] text-[clamp(2.8rem,6.4vw,6.1rem)] font-light leading-[0.9] tracking-[-0.065em] text-white">
+                Made with intent.
+                <br />
+                <span className="text-white/65">Built to endure.</span>
+              </h1>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 14 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.75, delay: 0.22, ease }}
+              className="max-w-sm lg:col-span-4 lg:pb-1"
+            >
+              <p className="text-[12px] leading-6 text-white/80 sm:text-[13px] sm:leading-7">
+                Explore the thinking, craft and coordination behind our selected construction and infrastructure projects.
+              </p>
+              <a
+                href="#selected-projects"
+                className="group mt-5 inline-flex min-h-11 items-center gap-5 border border-white/45 px-4 text-[9px] font-medium uppercase tracking-[0.17em] text-white transition-colors duration-300 hover:border-[#C5A77D] hover:bg-[#C5A77D] hover:text-[#202420] sm:mt-6"
+              >
+                Explore selected work
+                <ArrowDownRight size={15} className="transition-transform duration-300 group-hover:translate-x-0.5 group-hover:translate-y-0.5" />
+              </a>
+            </motion.div>
           </div>
 
-          {/* RIGHT */}
-          <div className="md:col-span-5">
-            <p className="text-[#4B5563] leading-relaxed md:leading-loose text-[14px] md:text-base">
-              {project.description}
+          <div className="mt-10 flex items-end justify-between gap-4 border-t border-white/30 pt-4 sm:mt-12 sm:pt-5">
+            <p className="text-[8px] uppercase tracking-[0.16em] text-white/75 sm:text-[9px] sm:tracking-[0.22em]">
+              Planning <span className="mx-1.5 text-[#C5A77D]">/</span>
+              Engineering <span className="mx-1.5 text-[#C5A77D]">/</span>
+              Execution
             </p>
+            <p className="shrink-0 font-mono text-[9px] text-white/70 sm:text-[10px]">RBT / 01</p>
           </div>
         </div>
+      </section>
 
-        {/* MOBILE IMAGE PROGRESS */}
-        {total > 1 && (
-          <div className="md:hidden pb-6 flex justify-center gap-2">
-            {images.map((_, i) => (
-              <span
-                key={i}
-                className={`h-[4px] rounded-full transition-all ${
-                  i === index
-                    ? "w-8 bg-[#8A6F4E]"
-                    : "w-4 bg-[#8A6F4E]/30"
-                }`}
-              />
-            ))}
+      {/* Flagship projects */}
+      <section id="selected-projects" className="relative bg-[#EAE7DF] px-5 py-14 sm:px-8 md:px-12 md:py-16">
+        <div className="mx-auto max-w-[1240px]">
+          <motion.div
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: true, margin: "-80px" }}
+            variants={{ hidden: {}, show: { transition: { staggerChildren: 0.12 } } }}
+            className="mb-10 grid gap-5 md:mb-14 md:grid-cols-12 md:items-end"
+          >
+            <motion.div variants={reveal} className="md:col-span-7">
+              <Eyebrow>01 / Featured projects</Eyebrow>
+              <h2 className="max-w-3xl text-[clamp(1.9rem,4vw,3.65rem)] leading-[1.04] tracking-[-0.045em] text-[#252A26]">
+                Work that speaks
+                <br className="hidden sm:block" /> through its execution.
+              </h2>
+            </motion.div>
+            <motion.p variants={reveal} className="max-w-md text-[13px] leading-7 text-[#5C625D] md:col-span-5 md:justify-self-end">
+              A closer look at selected engagements and the thinking behind their delivery.
+            </motion.p>
+          </motion.div>
+
+          {loading ? (
+            <ProjectsLoadingState />
+          ) : loadError ? (
+            <div className="border-t border-[#303432]/15 py-10 text-[13px] leading-7 text-[#5C625D]">
+              Projects are temporarily unavailable. Please revisit shortly.
+            </div>
+          ) : mainProjects.length ? (
+            <>
+              <MobileFlagshipProjects projects={mainProjects} onOpen={setActiveProject} />
+              <FlagshipProjectSelector projects={mainProjects} onOpen={setActiveProject} />
+            </>
+          ) : (
+            <div className="border-t border-[#303432]/15 py-10 text-[13px] leading-7 text-[#5C625D]">
+              Featured projects will appear here as they are published.
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* Extended portfolio */}
+      <section className="px-5 py-14 sm:px-8 md:px-12 md:py-20">
+        <div className="mx-auto max-w-[1240px]">
+          <div className="mb-9 grid gap-6 md:mb-12 md:grid-cols-12 md:items-end">
+            <div className="md:col-span-7">
+              <Eyebrow>02 / Extended portfolio</Eyebrow>
+              <h2 className="max-w-3xl text-[clamp(1.8rem,3.6vw,3.2rem)] leading-[1.05] tracking-[-0.045em]">
+                Consistency across
+                <br className="hidden sm:block" /> every scale of work.
+              </h2>
+            </div>
+            <p className="max-w-md text-[13px] leading-7 text-[#5C625D] md:col-span-5 md:justify-self-end">
+              Each project brings its own requirements. Our approach remains grounded in detail,
+              accountability and practical outcomes.
+            </p>
           </div>
+
+          {!loading && !loadError && otherProjects.length > 0 && (
+            <div className="mb-7 space-y-4 border-y border-[#303432]/15 py-4">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <label className="flex min-h-12 items-center gap-3 border border-[#303432]/15 bg-white/55 px-4 sm:max-w-sm sm:flex-1">
+                  <Search size={16} strokeWidth={1.5} className="shrink-0 text-[#947650]" />
+                  <input
+                    value={searchTerm}
+                    onChange={(event) => updateSearch(event.target.value)}
+                    placeholder="Search projects, locations…"
+                    aria-label="Search projects and locations"
+                    className="w-full bg-transparent text-[13px] text-[#252A26] outline-none placeholder:text-[#8B8A82]"
+                  />
+                  {searchTerm && (
+                    <button type="button" onClick={() => updateSearch("")} aria-label="Clear search" className="text-[#77766F] hover:text-[#252A26]">
+                      <X size={14} />
+                    </button>
+                  )}
+                </label>
+                <div className="flex items-center gap-2 text-[9px] uppercase tracking-[0.17em] text-[#77766F]">
+                  <SlidersHorizontal size={13} />
+                  <span>Filter by type</span>
+                </div>
+              </div>
+              <div className="flex gap-2 overflow-x-auto pb-1">
+                {categories.map((category) => (
+                  <button
+                    key={category}
+                    type="button"
+                    onClick={() => updateCategory(category)}
+                    aria-pressed={activeCategory === category}
+                    className={`shrink-0 border px-4 py-2.5 text-[9px] uppercase tracking-[0.14em] transition-colors ${
+                      activeCategory === category
+                        ? "border-[#303432] bg-[#303432] text-[#F4F2ED]"
+                        : "border-[#303432]/15 bg-transparent text-[#5C625D] hover:border-[#947650] hover:text-[#947650]"
+                    }`}
+                  >
+                    {category}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {loading ? (
+            <div className="space-y-6">
+              {[1, 2, 3].map((item) => <div key={item} className="h-24 animate-pulse border-t border-[#303432]/15 bg-[#EAE7DF]/40" />)}
+            </div>
+          ) : loadError ? (
+            <p className="border-t border-[#303432]/15 py-8 text-[13px] text-[#5C625D]">
+              The portfolio could not be loaded at this time.
+            </p>
+          ) : filteredProjects.length ? (
+            <>
+              <div className="mb-4 flex items-center justify-between gap-4">
+                <p className="text-[10px] uppercase tracking-[0.18em] text-[#77766F]">
+                  {searchTerm || activeCategory !== "All" ? "Matching projects" : "Project archive"}
+                </p>
+                <p className="font-mono text-[10px] text-[#77766F]">
+                  {String(filteredProjects.length).padStart(2, "0")} entries
+                </p>
+              </div>
+              <motion.div
+                key={page}
+                initial="hidden"
+                animate="show"
+                variants={{ hidden: {}, show: { transition: { staggerChildren: 0.08 } } }}
+              >
+                {visibleProjects.map((project, index) => (
+                  <OtherProjectRow
+                    key={`${project.title}-${page}-${index}`}
+                    project={project}
+                    index={page * PAGE_SIZE + index}
+                    onOpen={setActiveProject}
+                  />
+                ))}
+                <div className="border-t border-[#303432]/15" />
+              </motion.div>
+
+              {totalPages > 1 && (
+                <div className="mt-8 flex flex-col gap-5 border-t border-[#303432]/15 pt-5 sm:flex-row sm:items-center sm:justify-between">
+                  <p className="font-mono text-[10px] text-[#77766F]">
+                    {String(page * PAGE_SIZE + 1).padStart(2, "0")}–{String(Math.min((page + 1) * PAGE_SIZE, otherProjects.length)).padStart(2, "0")}
+                    <span className="mx-2 text-[#B4ADA0]">/</span>
+                    {String(otherProjects.length).padStart(2, "0")} projects
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => changePage(page - 1)}
+                      disabled={page === 0}
+                      className="flex h-11 items-center gap-2 border border-[#303432]/20 px-4 text-[9px] uppercase tracking-[0.16em] transition-colors hover:bg-[#303432] hover:text-white disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:bg-transparent disabled:hover:text-[#252A26]"
+                    >
+                      <ArrowLeft size={13} /> Previous
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => changePage(page + 1)}
+                      disabled={page >= totalPages - 1}
+                      className="flex h-11 items-center gap-2 border border-[#303432]/20 px-4 text-[9px] uppercase tracking-[0.16em] transition-colors hover:bg-[#303432] hover:text-white disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:bg-transparent disabled:hover:text-[#252A26]"
+                    >
+                      Next <ArrowRight size={13} />
+                    </button>
+                  </div>
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="border-t border-[#303432]/15 py-10">
+              <p className="text-[15px] text-[#252A26]">No projects match those filters.</p>
+              <p className="mt-2 text-[13px] leading-6 text-[#77766F]">Try another keyword or clear the selected category to browse the full portfolio.</p>
+              <button
+                type="button"
+                onClick={() => { updateSearch(""); updateCategory("All"); }}
+                className="mt-5 inline-flex items-center gap-2 border-b border-[#947650] pb-2 text-[9px] uppercase tracking-[0.18em] text-[#343A35]"
+              >
+                Clear filters <ArrowRight size={13} />
+              </button>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* Contact close */}
+      <section className="relative overflow-hidden bg-[#242925] px-5 py-14 text-[#F4F2ED] sm:px-8 md:px-12 md:py-20">
+        <div aria-hidden="true" className="pointer-events-none absolute -right-16 -top-24 h-72 w-72 rounded-full border border-white/10" />
+        <div className="relative mx-auto grid max-w-[1240px] gap-10 md:grid-cols-12 md:items-end">
+          <div className="md:col-span-8">
+            <Eyebrow light>03 / Start a conversation</Eyebrow>
+            <h2 className="max-w-4xl text-[clamp(2rem,5vw,4.7rem)] leading-[1] tracking-[-0.05em]">
+              Have a project in mind?
+              <br />
+              <span className="text-[#A7A79B]">Let’s discuss what’s possible.</span>
+            </h2>
+            <p className="mt-6 max-w-xl text-[13px] leading-7 text-[#C2C4BC]">
+              Speak with our team about scope, feasibility, planning and delivery requirements.
+            </p>
+          </div>
+          <div className="md:col-span-4 md:flex md:justify-end">
+            <a
+              href="/contact"
+              className="inline-flex min-h-12 items-center justify-between gap-10 border border-white/25 px-5 text-[10px] uppercase tracking-[0.18em] transition-colors hover:border-[#C5A77D] hover:bg-[#C5A77D] hover:text-[#242925]"
+            >
+              Discuss a project <ArrowRight size={15} />
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <Footer />
+
+      <AnimatePresence>
+        {activeProject && (
+          <ProjectModal
+            key={activeProject.title}
+            project={activeProject}
+            onClose={() => setActiveProject(null)}
+          />
         )}
-      </motion.div>
-    </motion.div>
-  );
-}
-
-
-
-/* ---------------- FOOTER ---------------- */
-function EnterpriseFooter() {
-  return (
-    <footer className="bg-[#1F2933] py-10 md:py-14">
-      <div className="max-w-7xl mx-auto px-5 md:px-12">
-
-        {/* TOP GRID */}
-        <div className="grid gap-6 md:grid-cols-4 md:gap-14 text-[11px] text-[#CBD5E1]">
-
-          {/* Brand */}
-          <div>
-            <p className="text-[13px] text-white mb-2">
-              RafaBuildTec LLP
-            </p>
-            <p className="leading-relaxed max-w-xs">
-              Construction & infrastructure delivery across India.
-            </p>
-          </div>
-
-          {/* Company */}
-          <div>
-            <p className="uppercase tracking-widest text-[#94A3B8] mb-2">
-              Company
-            </p>
-            <p className="leading-relaxed">
-              About · Governance · Leadership
-            </p>
-          </div>
-
-          {/* Capabilities */}
-          <div>
-            <p className="uppercase tracking-widest text-[#94A3B8] mb-2">
-              Capabilities
-            </p>
-            <p className="leading-relaxed">
-              Commercial · Institutional · Infrastructure · Industrial
-            </p>
-          </div>
-
-          {/* Presence */}
-          <div>
-            <p className="uppercase tracking-widest text-[#94A3B8] mb-2">
-              Presence
-            </p>
-            <p className="leading-relaxed">
-              Udupi · Mangalore · Bangalore · Goa · Hubli · Belgaum
-            </p>
-          </div>
-        </div>
-
-        {/* DIVIDER */}
-        <div className="mt-6 pt-5 border-t border-white/10 flex flex-col sm:flex-row gap-2 sm:gap-0 sm:justify-between text-[10px] text-[#94A3B8]">
-          <span>
-            © {new Date().getFullYear()} RafaBuildTec LLP
-          </span>
-          <span className="italic">
-            Engineered for permanence
-          </span>
-        </div>
-
-      </div>
-    </footer>
+      </AnimatePresence>
+    </main>
   );
 }

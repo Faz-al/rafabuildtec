@@ -1,5 +1,641 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Manrope:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;1,400&display=swap");
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-body { font-family: ui-sans-serif, system-ui, -apple-system; }
+
+/* =========================================================
+   RAFABUILDTEC — GLOBAL DESIGN FOUNDATION
+   Mobile-first
+   ========================================================= */
+
+:root {
+  /* -------------------------------------------------------
+     Brand palette
+     ------------------------------------------------------- */
+
+  --rb-ink: #171918;
+  --rb-ink-soft: #242827;
+  --rb-graphite: #303432;
+
+  --rb-body: #4f5551;
+  --rb-muted: #737874;
+  --rb-subtle: #9a9e99;
+
+  --rb-ivory: #f4f2ed;
+  --rb-paper: #faf9f6;
+  --rb-stone: #e8e6e0;
+  --rb-concrete: #d9d8d2;
+  --rb-concrete-dark: #c9c8c1;
+
+  --rb-metal: #967a54;
+  --rb-metal-dark: #7c6240;
+  --rb-metal-soft: rgba(150, 122, 84, 0.16);
+
+  --rb-line: rgba(23, 25, 24, 0.1);
+  --rb-line-strong: rgba(23, 25, 24, 0.18);
+  --rb-line-light: rgba(255, 255, 255, 0.12);
+
+  --rb-white: #ffffff;
+
+  /* -------------------------------------------------------
+     Typography
+     ------------------------------------------------------- */
+
+  --font-display: "DM Sans", system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", sans-serif;
+
+  --font-body: "Manrope", system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", sans-serif;
+
+  --font-editorial: "Playfair Display", Georgia, serif;
+
+  /* -------------------------------------------------------
+     Layout
+     ------------------------------------------------------- */
+
+  --rb-content: 1280px;
+  --rb-content-wide: 1440px;
+  --rb-reading: 760px;
+
+  --rb-gutter: 20px;
+
+  /* -------------------------------------------------------
+     Radius
+     ------------------------------------------------------- */
+
+  --rb-radius-sm: 8px;
+  --rb-radius-md: 14px;
+  --rb-radius-lg: 22px;
+  --rb-radius-xl: 30px;
+
+  /* -------------------------------------------------------
+     Motion
+     ------------------------------------------------------- */
+
+  --rb-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --rb-ease-soft: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* -------------------------------------------------------
+     Shadows
+     ------------------------------------------------------- */
+
+  --rb-shadow-soft:
+    0 10px 35px rgba(20, 22, 21, 0.06);
+
+  --rb-shadow-card:
+    0 18px 60px rgba(20, 22, 21, 0.08);
+
+  --rb-shadow-deep:
+    0 30px 90px rgba(20, 22, 21, 0.14);
+}
+
+/* =========================================================
+   BASE RESET
+   ========================================================= */
+
+html {
+  scroll-behavior: smooth;
+  background: var(--rb-ivory);
+  color: var(--rb-ink);
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100%;
+  background: var(--rb-ivory);
+  color: var(--rb-ink);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.65;
+  overflow-x: hidden;
+}
+
+#root {
+  min-height: 100svh;
+  width: 100%;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+::selection {
+  background: var(--rb-ink);
+  color: var(--rb-paper);
+}
+
+button,
+a,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+/* =========================================================
+   LINKS
+   ========================================================= */
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+a,
+button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+:focus-visible {
+  outline: 2px solid var(--rb-metal);
+  outline-offset: 4px;
+}
+
+/* =========================================================
+   IMAGES
+   ========================================================= */
+
+img,
+picture,
+video,
+canvas,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+img {
+  height: auto;
+}
+
+.rb-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.rb-image-contain {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.rb-image-premium {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition:
+    transform 1.2s var(--rb-ease),
+    filter 0.8s var(--rb-ease);
+}
+
+.rb-image-frame {
+  position: relative;
+  overflow: hidden;
+  background: var(--rb-stone);
+}
+
+.rb-image-frame:hover .rb-image-premium {
+  transform: scale(1.025);
+}
+
+/* =========================================================
+   TYPOGRAPHY FOUNDATION
+   ========================================================= */
+
+.rb-display {
+  font-family: var(--font-display);
+  font-weight: 300;
+  letter-spacing: -0.045em;
+  line-height: 0.98;
+}
+
+.rb-display-medium {
+  font-family: var(--font-display);
+  font-weight: 500;
+  letter-spacing: -0.04em;
+  line-height: 0.98;
+}
+
+.rb-editorial {
+  font-family: var(--font-editorial);
+  font-weight: 400;
+  letter-spacing: -0.025em;
+}
+
+.rb-body {
+  font-family: var(--font-body);
+}
+
+.rb-eyebrow {
+  font-family: var(--font-body);
+  font-size: 9px;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--rb-metal);
+}
+
+.rb-micro {
+  font-family: var(--font-body);
+  font-size: 9px;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+/* =========================================================
+   MOBILE-FIRST TYPE SCALE
+   ========================================================= */
+
+.rb-title {
+  font-size: clamp(2.5rem, 11vw, 7rem);
+}
+
+.rb-heading-xl {
+  font-size: clamp(2.25rem, 8vw, 5rem);
+}
+
+.rb-heading-lg {
+  font-size: clamp(1.9rem, 6vw, 3.5rem);
+}
+
+.rb-heading-md {
+  font-size: clamp(1.45rem, 4vw, 2.25rem);
+}
+
+.rb-copy-lg {
+  font-size: clamp(1rem, 2vw, 1.15rem);
+  line-height: 1.75;
+}
+
+.rb-copy {
+  font-size: 0.9rem;
+  line-height: 1.75;
+  color: var(--rb-body);
+}
+
+/* =========================================================
+   LAYOUT SYSTEM
+   ========================================================= */
+
+.rb-container {
+  width: min(
+    calc(100% - (var(--rb-gutter) * 2)),
+    var(--rb-content)
+  );
+  margin-inline: auto;
+}
+
+.rb-container-wide {
+  width: min(
+    calc(100% - (var(--rb-gutter) * 2)),
+    var(--rb-content-wide)
+  );
+  margin-inline: auto;
+}
+
+.rb-reading {
+  width: min(100%, var(--rb-reading));
+}
+
+.rb-section {
+  position: relative;
+  padding-block: 4.5rem;
+}
+
+.rb-section-lg {
+  position: relative;
+  padding-block: 6rem;
+}
+
+/* =========================================================
+   SURFACES
+   ========================================================= */
+
+.rb-surface-light {
+  background: var(--rb-ivory);
+  color: var(--rb-ink);
+}
+
+.rb-surface-paper {
+  background: var(--rb-paper);
+  color: var(--rb-ink);
+}
+
+.rb-surface-stone {
+  background: var(--rb-stone);
+  color: var(--rb-ink);
+}
+
+.rb-surface-dark {
+  background: var(--rb-ink);
+  color: var(--rb-paper);
+}
+
+.rb-surface-graphite {
+  background: var(--rb-ink-soft);
+  color: var(--rb-paper);
+}
+
+/* =========================================================
+   LINES / ENGINEERING DETAILS
+   ========================================================= */
+
+.rb-line {
+  border-color: var(--rb-line);
+}
+
+.rb-rule {
+  width: 100%;
+  height: 1px;
+  background: var(--rb-line);
+}
+
+.rb-rule-dark {
+  width: 100%;
+  height: 1px;
+  background: var(--rb-line-light);
+}
+
+.rb-grid {
+  background-image:
+    linear-gradient(
+      to right,
+      rgba(23, 25, 24, 0.055) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      to bottom,
+      rgba(23, 25, 24, 0.055) 1px,
+      transparent 1px
+    );
+  background-size: 72px 72px;
+}
+
+.rb-grid-fine {
+  background-image:
+    linear-gradient(
+      to right,
+      rgba(23, 25, 24, 0.04) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      to bottom,
+      rgba(23, 25, 24, 0.04) 1px,
+      transparent 1px
+    );
+  background-size: 36px 36px;
+}
+
+.rb-grid-dark {
+  background-image:
+    linear-gradient(
+      to right,
+      rgba(255, 255, 255, 0.055) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      to bottom,
+      rgba(255, 255, 255, 0.055) 1px,
+      transparent 1px
+    );
+  background-size: 72px 72px;
+}
+
+/* =========================================================
+   PREMIUM SURFACE / CARD FOUNDATION
+   ========================================================= */
+
+.rb-card {
+  position: relative;
+  border: 1px solid var(--rb-line);
+  background: rgba(250, 249, 246, 0.72);
+  box-shadow: var(--rb-shadow-soft);
+}
+
+.rb-card-dark {
+  border: 1px solid var(--rb-line-light);
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.rb-glass {
+  background: rgba(250, 249, 246, 0.76);
+  border: 1px solid rgba(23, 25, 24, 0.08);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+/* =========================================================
+   BUTTON FOUNDATION
+   ========================================================= */
+
+.rb-button {
+  position: relative;
+  display: inline-flex;
+  min-height: 46px;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 0.8rem 1.15rem;
+  border: 1px solid transparent;
+  font-family: var(--font-body);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  line-height: 1;
+  text-transform: uppercase;
+  transition:
+    background-color 0.35s var(--rb-ease),
+    color 0.35s var(--rb-ease),
+    border-color 0.35s var(--rb-ease),
+    transform 0.35s var(--rb-ease);
+}
+
+.rb-button:hover {
+  transform: translateY(-1px);
+}
+
+.rb-button-primary {
+  background: var(--rb-ink);
+  color: var(--rb-paper);
+}
+
+.rb-button-primary:hover {
+  background: var(--rb-graphite);
+}
+
+.rb-button-outline {
+  border-color: var(--rb-line-strong);
+  background: transparent;
+  color: var(--rb-ink);
+}
+
+.rb-button-outline:hover {
+  border-color: var(--rb-ink);
+  background: var(--rb-ink);
+  color: var(--rb-paper);
+}
+
+.rb-button-metal {
+  background: var(--rb-metal);
+  color: var(--rb-white);
+}
+
+.rb-button-metal:hover {
+  background: var(--rb-metal-dark);
+}
+
+/* =========================================================
+   SCROLL / MOBILE UX
+   ========================================================= */
+
+.rb-horizontal-scroll {
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.rb-horizontal-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+body {
+  scrollbar-width: thin;
+  scrollbar-color: var(--rb-concrete-dark) transparent;
+}
+
+body::-webkit-scrollbar {
+  width: 8px;
+}
+
+body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+body::-webkit-scrollbar-thumb {
+  background: var(--rb-concrete-dark);
+  border-radius: 999px;
+}
+
+/* =========================================================
+   SAFE MOBILE VIEWPORT HELPERS
+   ========================================================= */
+
+.rb-screen {
+  min-height: 100svh;
+}
+
+.rb-screen-dvh {
+  min-height: 100dvh;
+}
+
+.rb-safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.rb-safe-top {
+  padding-top: env(safe-area-inset-top);
+}
+
+/* =========================================================
+   RESPONSIVE FOUNDATION
+   ========================================================= */
+
+@media (min-width: 640px) {
+  :root {
+    --rb-gutter: 28px;
+  }
+
+  .rb-section {
+    padding-block: 5.5rem;
+  }
+
+  .rb-section-lg {
+    padding-block: 7rem;
+  }
+
+  .rb-eyebrow {
+    font-size: 10px;
+    letter-spacing: 0.32em;
+  }
+}
+
+@media (min-width: 768px) {
+  :root {
+    --rb-gutter: 40px;
+  }
+
+  .rb-section {
+    padding-block: 7rem;
+  }
+
+  .rb-section-lg {
+    padding-block: 9rem;
+  }
+
+  .rb-eyebrow {
+    font-size: 10px;
+  }
+
+  .rb-micro {
+    font-size: 10px;
+  }
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --rb-gutter: 48px;
+  }
+
+  .rb-section {
+    padding-block: 8rem;
+  }
+
+  .rb-section-lg {
+    padding-block: 11rem;
+  }
+}
+
+@media (min-width: 1280px) {
+  :root {
+    --rb-gutter: 56px;
+  }
+}
+
+/* =========================================================
+   REDUCED MOTION
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
