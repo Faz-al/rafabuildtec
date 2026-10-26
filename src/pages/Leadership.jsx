@@ -1,6 +1,6 @@
 import React, { useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
-import { ArrowDownRight, ArrowRight, Check, ShieldCheck } from "lucide-react";
+import { ArrowDownRight, ArrowRight } from "lucide-react";
 import { Navbar, Footer } from "../components/Layout";
 
 const ease = [0.22, 1, 0.36, 1];
@@ -80,42 +80,48 @@ export default function Leadership() {
 
 function Hero() {
   return (
-    <section className="px-5 pb-16 pt-32 sm:px-8 sm:pt-36 md:px-12 md:pb-24 md:pt-44 lg:pt-48">
+    <section className="px-5 pb-12 pt-28 sm:px-8 sm:pt-32 md:px-12 md:pb-16 md:pt-36 lg:pt-40">
       <div className="mx-auto max-w-[1440px]">
-        <motion.div
-          initial="hidden"
-          animate="show"
-          variants={{ hidden: {}, show: { transition: { staggerChildren: 0.13 } } }}
-          className="grid gap-10 md:grid-cols-12 md:items-end md:gap-8"
-        >
-          <motion.div variants={reveal} className="md:col-span-8">
-            <Eyebrow>Leadership / Governance</Eyebrow>
-            <h1 className="max-w-5xl text-[clamp(2.45rem,6.1vw,5.8rem)] font-normal leading-[0.98] tracking-[-0.055em]">
-              Clarity in decisions.
-              <br />
-              <span className="text-[#8C8B80]">Accountability in delivery.</span>
-            </h1>
-          </motion.div>
-          <motion.div variants={reveal} className="md:col-span-4 md:pb-2 md:pl-5">
-            <p className="max-w-md text-[14px] leading-7 text-[#5C625D] sm:text-[15px] sm:leading-8">
-              RafaBuildTec’s leadership framework is designed to reduce execution risk,
-              reinforce responsibility and support consistent, considered project delivery.
-            </p>
-            <a
-              href="#leadership-structure"
-              className="mt-6 inline-flex items-center gap-3 border-b border-[#947650]/60 pb-2 text-[10px] font-medium uppercase tracking-[0.19em] transition-colors hover:text-[#947650]"
+        <div className="grid items-end gap-9 md:grid-cols-12 md:gap-12">
+          <motion.div
+            initial="hidden"
+            animate="show"
+            variants={{ hidden: {}, show: { transition: { staggerChildren: 0.12 } } }}
+            className="md:col-span-7"
+          >
+            <motion.h1
+              variants={reveal}
+              className="max-w-3xl text-[clamp(3rem,7vw,6.5rem)] font-normal leading-[0.91] tracking-[-0.065em] text-[#252A26]"
             >
-              Explore governance <ArrowDownRight size={14} strokeWidth={1.5} />
-            </a>
+              Leadership
+              <span className="block text-[#89897E]">with purpose.</span>
+            </motion.h1>
+            <motion.p variants={reveal} className="mt-6 max-w-lg text-[14px] leading-7 text-[#5C625D] sm:text-[15px] sm:leading-8">
+              Clear responsibility. Sound decisions. Accountable delivery.
+            </motion.p>
+            <motion.a
+              variants={reveal}
+              href="#leadership-structure"
+              className="mt-7 inline-flex min-h-11 items-center gap-3 border-b border-[#947650]/60 pb-2 text-[10px] font-medium uppercase tracking-[0.16em] text-[#343A35] transition-colors hover:text-[#947650]"
+            >
+              Meet our leadership structure <ArrowDownRight size={14} strokeWidth={1.5} />
+            </motion.a>
           </motion.div>
-        </motion.div>
-
-        <div className="mt-12 flex items-center gap-4 border-t border-[#303432]/15 pt-4 md:mt-20">
-          <span className="h-1.5 w-1.5 rounded-full bg-[#947650]" />
-          <p className="text-[9px] uppercase tracking-[0.2em] text-[#77766F] sm:text-[10px] sm:tracking-[0.24em]">
-            Responsibility · Oversight · Decision ownership
-          </p>
-          <span className="ml-auto font-mono text-[10px] text-[#77766F]">RBT / 04</span>
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.18, ease }}
+            className="md:col-span-5"
+          >
+            <div className="relative aspect-[5/4] overflow-hidden bg-[#DED9CE] md:aspect-[4/5] md:max-h-[510px]">
+              <img
+                src="https://images.unsplash.com/photo-1487958449943-2429e8be8625?auto=format&fit=crop&w=1400&q=85"
+                alt="Contemporary architecture with clean structural lines"
+                fetchPriority="high"
+                className="h-full w-full object-cover object-center"
+              />
+            </div>
+          </motion.div>
         </div>
       </div>
     </section>
@@ -133,7 +139,7 @@ function LeadershipPhilosophy() {
         className="mx-auto grid max-w-[1440px] gap-8 md:grid-cols-12 md:gap-12"
       >
         <motion.div variants={reveal} className="md:col-span-7">
-          <Eyebrow>Our philosophy</Eyebrow>
+          <Eyebrow>Our approach</Eyebrow>
           <h2 className="max-w-3xl text-[clamp(1.95rem,4vw,3.65rem)] leading-[1.04] tracking-[-0.045em]">
             Leadership is not visibility.
             <br />
@@ -156,7 +162,7 @@ function LeadershipPhilosophy() {
 
 function LeadershipStructure() {
   return (
-    <section id="leadership-structure" className="px-5 py-16 sm:px-8 md:px-12 md:py-28">
+    <section id="leadership-structure" className="px-5 py-14 sm:px-8 md:px-12 md:py-24">
       <div className="mx-auto max-w-[1440px]">
         <motion.div
           initial="hidden"
@@ -166,7 +172,7 @@ function LeadershipStructure() {
           className="mb-9 grid gap-5 md:mb-14 md:grid-cols-12 md:items-end"
         >
           <div className="md:col-span-7">
-            <Eyebrow>01 / Responsibility structure</Eyebrow>
+            <Eyebrow>Leadership structure</Eyebrow>
             <h2 className="max-w-3xl text-[clamp(1.9rem,3.8vw,3.4rem)] leading-[1.04] tracking-[-0.045em]">
               Clear authority.
               <br className="hidden sm:block" /> Defined accountability.
@@ -186,7 +192,7 @@ function LeadershipStructure() {
               whileInView="show"
               viewport={{ once: true, margin: "-35px" }}
               variants={reveal}
-              className="grid gap-4 border-b border-[#303432]/15 py-6 sm:py-7 md:grid-cols-12 md:items-center md:gap-8 md:py-8"
+              className="grid gap-4 border-b border-[#303432]/15 py-6 sm:py-7 md:grid-cols-12 md:items-center md:gap-8 md:py-7"
             >
               <div className="flex items-center gap-3 md:col-span-1">
                 <span className="font-mono text-[10px] text-[#947650]">{role.number}</span>
@@ -201,9 +207,6 @@ function LeadershipStructure() {
                 </p>
               </div>
               <p className="text-[13px] leading-7 text-[#5C625D] md:col-span-5">{role.scope}</p>
-              <div className="hidden justify-end md:col-span-1 md:flex">
-                <ArrowDownRight size={16} strokeWidth={1.4} className="text-[#947650]" />
-              </div>
             </motion.article>
           ))}
         </div>
@@ -218,7 +221,7 @@ function DecisionFramework() {
   const lineWidth = useTransform(scrollXProgress, [0, 1], ["0%", "100%"]);
 
   return (
-    <section className="overflow-hidden bg-[#EAE7DF] px-5 py-16 sm:px-8 md:px-12 md:py-28">
+    <section className="overflow-hidden bg-[#EAE7DF] px-5 py-14 sm:px-8 md:px-12 md:py-24">
       <div className="mx-auto max-w-[1440px]">
         <motion.div
           initial="hidden"
@@ -228,7 +231,7 @@ function DecisionFramework() {
           className="mb-10 grid gap-5 md:mb-16 md:grid-cols-12 md:items-end"
         >
           <div className="md:col-span-7">
-            <Eyebrow>02 / Decision process</Eyebrow>
+            <Eyebrow>Decision process</Eyebrow>
             <h2 className="max-w-3xl text-[clamp(1.9rem,4vw,3.5rem)] leading-[1.04] tracking-[-0.045em]">
               Decisions made with
               <br className="hidden sm:block" /> structure and context.
@@ -277,7 +280,7 @@ function DecisionFramework() {
 
 function ExperienceDepth() {
   return (
-    <section className="px-5 py-16 sm:px-8 md:px-12 md:py-28">
+    <section className="px-5 py-14 sm:px-8 md:px-12 md:py-24">
       <div className="mx-auto max-w-[1440px]">
         <motion.div
           initial="hidden"
@@ -287,7 +290,7 @@ function ExperienceDepth() {
           className="mb-9 grid gap-5 md:mb-14 md:grid-cols-12 md:items-end"
         >
           <div className="md:col-span-7">
-            <Eyebrow>03 / Experience & operating context</Eyebrow>
+            <Eyebrow>Experience</Eyebrow>
             <h2 className="max-w-3xl text-[clamp(1.9rem,3.8vw,3.4rem)] leading-[1.04] tracking-[-0.045em]">
               Depth of experience.
               <br className="hidden sm:block" /> Discipline in practice.
@@ -318,9 +321,6 @@ function ExperienceDepth() {
             </motion.div>
           ))}
         </div>
-        <p className="mt-4 text-[10px] leading-5 text-[#8C8B80]">
-          Experience and operating descriptors are presented as supplied in the existing page content.
-        </p>
       </div>
     </section>
   );
@@ -355,13 +355,6 @@ function GovernanceCommitment() {
           </div>
         </motion.div>
 
-        <motion.div variants={reveal} className="mt-10 flex items-center gap-4 border-t border-white/15 pt-4">
-          <span className="h-1.5 w-1.5 rounded-full bg-[#C5A77D]" />
-          <p className="text-[9px] uppercase tracking-[0.2em] text-white/50 sm:text-[10px] sm:tracking-[0.24em]">
-            Responsibility · Oversight · Accountability
-          </p>
-          <span className="ml-auto font-mono text-[10px] text-white/45">RBT / 05</span>
-        </motion.div>
       </motion.div>
     </section>
   );

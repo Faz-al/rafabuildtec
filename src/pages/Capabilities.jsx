@@ -104,43 +104,48 @@ export default function Capabilities() {
 
 function Hero() {
   return (
-    <section className="relative px-5 pb-16 pt-32 sm:px-8 sm:pt-36 md:px-12 md:pb-24 md:pt-44 lg:pt-48">
+    <section className="px-5 pb-12 pt-32 sm:px-8 sm:pt-36 md:px-12 md:pb-20 md:pt-44 lg:pt-48">
       <div className="mx-auto max-w-[1440px]">
         <motion.div
           initial="hidden"
           animate="show"
           variants={{ hidden: {}, show: { transition: { staggerChildren: 0.13 } } }}
-          className="grid gap-10 md:grid-cols-12 md:items-end md:gap-8"
+          className="grid gap-8 md:grid-cols-12 md:items-end md:gap-10"
         >
           <motion.div variants={reveal} className="md:col-span-8">
-            <Eyebrow>Capabilities / Delivery approach</Eyebrow>
+            <Eyebrow>Capabilities</Eyebrow>
             <h1 className="max-w-5xl text-[clamp(2.55rem,6.2vw,5.9rem)] font-normal leading-[0.98] tracking-[-0.055em]">
-              The capability to build.
+              Thoughtful planning.
               <br />
-              <span className="text-[#8C8B80]">The discipline to deliver.</span>
+              <span className="text-[#8C8B80]">Disciplined execution.</span>
             </h1>
           </motion.div>
-          <motion.div variants={reveal} className="md:col-span-4 md:pb-2 md:pl-5">
+          <motion.div variants={reveal} className="md:col-span-4 md:pb-1 md:pl-3">
             <p className="max-w-md text-[14px] leading-7 text-[#5C625D] sm:text-[15px] sm:leading-8">
-              RafaBuildTec brings planning, engineering coordination and site execution
-              together in a structured approach to complex construction environments.
+              From early planning to final handover, we bring engineering coordination,
+              site execution and project controls into one considered process.
             </p>
             <a
               href="#capability-domains"
-              className="mt-6 inline-flex items-center gap-3 border-b border-[#947650]/60 pb-2 text-[10px] font-medium uppercase tracking-[0.19em] transition-colors hover:text-[#947650]"
+              className="mt-6 inline-flex items-center gap-3 border-b border-[#947650]/60 pb-2 text-[10px] font-medium uppercase tracking-[0.16em] transition-colors hover:text-[#947650]"
             >
               Explore capabilities <ArrowDownRight size={14} strokeWidth={1.5} />
             </a>
           </motion.div>
         </motion.div>
 
-        <div className="mt-12 flex items-center gap-4 border-t border-[#303432]/15 pt-4 md:mt-20">
-          <span className="h-1.5 w-1.5 rounded-full bg-[#947650]" />
-          <p className="text-[9px] uppercase tracking-[0.2em] text-[#77766F] sm:text-[10px] sm:tracking-[0.24em]">
-            Planning · Engineering · Execution · Governance
-          </p>
-          <span className="ml-auto font-mono text-[10px] text-[#77766F]">RBT / 02</span>
-        </div>
+        <motion.div
+          initial={{ opacity: 0, y: 18 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.9, delay: 0.2, ease }}
+          className="mt-10 overflow-hidden sm:mt-14 md:mt-16"
+        >
+          <img
+            src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=2200&q=85"
+            alt="Contemporary institutional architecture with clean structural lines"
+            className="h-[260px] w-full object-cover object-center sm:h-[360px] md:h-[470px] lg:h-[540px]"
+          />
+        </motion.div>
       </div>
     </section>
   );
@@ -297,9 +302,6 @@ function ExecutionFramework() {
                     {step.title}
                   </h3>
                   <p className="mt-3 text-[13px] leading-7 text-[#5C625D]">{step.desc}</p>
-                  <p className="mt-5 text-[9px] uppercase tracking-[0.18em] text-[#8C8B80]">
-                    {step.detail}
-                  </p>
                 </div>
               </article>
             ))}
@@ -392,7 +394,6 @@ function ClosingStatement() {
           <p className="text-[9px] uppercase tracking-[0.2em] text-white/50 sm:text-[10px] sm:tracking-[0.24em]">
             Structured planning. Responsible execution.
           </p>
-          <span className="ml-auto font-mono text-[10px] text-white/45">RBT / 03</span>
         </motion.div>
       </motion.div>
     </section>

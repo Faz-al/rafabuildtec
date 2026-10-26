@@ -3378,6 +3378,7 @@ function EnquirySection() {
    FOOTER
 ========================================================= */
 
+
 function EnterpriseFooter() {
   const columns = [
     {
@@ -3403,67 +3404,96 @@ function EnterpriseFooter() {
   ];
 
   return (
-    <footer className="relative border-t border-[#303432]/15 bg-[#F4F2ED]">
+    <footer className="relative overflow-hidden border-t border-[#303432]/15 bg-[#F4F2ED] text-[#252A26]">
       <div className="mx-auto max-w-[1600px] px-5 sm:px-8 lg:px-12">
-        <div className="grid gap-10 py-14 sm:gap-12 sm:py-20 lg:grid-cols-12 lg:py-24">
+        {/* Main footer */}
+        <div className="grid gap-12 py-14 sm:py-16 lg:grid-cols-12 lg:gap-10 lg:py-20">
+          {/* Brand */}
           <div className="lg:col-span-5">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 border border-[#303432] flex items-center justify-center">
-                <span className="w-4 h-px bg-[#967A54]" />
-              </div>
+            <Link
+              to="/"
+              aria-label="RafaBuildTec home"
+              className="inline-flex items-center"
+            >
+              <img
+  src={logo}
+  alt="RafaBuildTec LLP"
+  className="h-12 w-auto max-w-[220px] object-contain object-left sm:h-14"
+/>
+            </Link>
 
-              <div>
-                <p className="text-[14px] font-medium">RafaBuildTec</p>
-                <p className="text-[8px] uppercase tracking-[0.3em] text-[#737874]">
-                  LLP
-                </p>
-              </div>
-            </div>
-
-            <p className="mt-8 text-[14px] leading-[1.8] text-[#737874] max-w-sm">
+            <p className="mt-7 max-w-sm text-[13px] leading-[1.9] text-[#737874] sm:text-[14px]">
               Construction and infrastructure delivery built around
-              engineering precision, governance and permanence.
+              engineering precision, responsible execution and
+              long-term performance.
             </p>
 
-            <p className="mt-12 text-[9px] uppercase tracking-[0.25em] text-[#967A54]">
-              Engineered for permanence.
-            </p>
+            <div className="mt-9 flex items-center gap-3">
+              <span className="h-px w-8 bg-[#967A54]" />
+              <p className="text-[9px] font-medium uppercase tracking-[0.22em] text-[#967A54]">
+                Engineered for permanence.
+              </p>
+            </div>
           </div>
 
-          <div className="lg:col-span-6 lg:col-start-7 grid grid-cols-2 sm:grid-cols-3 gap-10">
+          {/* Navigation */}
+          <div className="grid grid-cols-2 gap-x-8 gap-y-10 sm:grid-cols-3 lg:col-span-6 lg:col-start-7 lg:gap-x-6">
             {columns.map((column) => (
               <div key={column.title}>
-                <p className="text-[9px] uppercase tracking-[0.25em] text-[#967A54]">
+                <h3 className="text-[9px] font-semibold uppercase tracking-[0.22em] text-[#967A54]">
                   {column.title}
-                </p>
+                </h3>
 
-                <div className="mt-6 space-y-4">
+                <ul className="mt-5 space-y-4">
                   {column.links.map(([label, href]) => (
-                    <Link
-                      key={label}
-                      to={href}
-                      className="block text-[12px] text-[#4F5551] hover:text-[#171918] transition-colors"
-                    >
-                      {label}
-                    </Link>
+                    <li key={label}>
+                      <Link
+                        to={href}
+                        className="group inline-flex items-center text-[12px] text-[#555B56] transition-colors duration-200 hover:text-[#171918] sm:text-[13px]"
+                      >
+                        <span>{label}</span>
+                        <span
+                          aria-hidden="true"
+                          className="ml-1.5 -translate-x-1 opacity-0 transition-all duration-200 group-hover:translate-x-0 group-hover:opacity-60"
+                        >
+                          ↗
+                        </span>
+                      </Link>
+                    </li>
                   ))}
-                </div>
+                </ul>
               </div>
             ))}
           </div>
         </div>
 
-        <div className="border-t border-[#303432]/15 py-6 flex flex-col sm:flex-row justify-between gap-3 text-[9px] uppercase tracking-[0.16em] text-[#737874]">
-          <span>© {new Date().getFullYear()} RafaBuildTec LLP</span>
+        {/* Closing statement */}
+        <div className="border-y border-[#303432]/15 py-8 sm:py-10 lg:py-12">
+          <p className="max-w-4xl text-[clamp(1.8rem,4.5vw,3.6rem)] font-normal leading-[1.08] tracking-[-0.045em] text-[#252A26]">
+            Built with purpose.
+            <span className="text-[#898A80]"> Delivered with discipline.</span>
+          </p>
+        </div>
 
-          <span>Udupi · Karnataka · India</span>
+        {/* Bottom bar */}
+        <div className="flex flex-col gap-4 py-6 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
+          <p className="text-[9px] uppercase tracking-[0.13em] text-[#737874]">
+            © {new Date().getFullYear()} RafaBuildTec LLP. All rights reserved.
+          </p>
 
-          <span>Construction / Infrastructure</span>
+          <p className="text-[9px] uppercase tracking-[0.15em] text-[#737874]">
+            Udupi · Karnataka · India
+          </p>
+
+          <p className="text-[9px] uppercase tracking-[0.13em] text-[#737874]">
+            Construction &amp; Infrastructure
+          </p>
         </div>
       </div>
     </footer>
   );
 }
+
 
 /* =========================================================
    HOME

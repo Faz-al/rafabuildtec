@@ -21,17 +21,28 @@ const navigation = [
   { label: "Contact", path: "/contact" },
 ];
 
+
 /* =========================================================
    SHARED NAVBAR — HOMEPAGE DESIGN
 ========================================================= */
 
 export function Navbar() {
   const [open, setOpen] = React.useState(false);
+  const [scrolled, setScrolled] = React.useState(false);
   const location = useLocation();
 
   React.useEffect(() => {
     setOpen(false);
   }, [location.pathname]);
+
+  React.useEffect(() => {
+    const updateScroll = () => setScrolled(window.scrollY > 24);
+
+    updateScroll();
+    window.addEventListener("scroll", updateScroll, { passive: true });
+
+    return () => window.removeEventListener("scroll", updateScroll);
+  }, []);
 
   React.useEffect(() => {
     if (!open) return undefined;
@@ -53,8 +64,14 @@ export function Navbar() {
   return (
     <header className="fixed inset-x-0 top-0 z-[100]">
       {/* Main navigation bar */}
-      <div className="border-b border-[#303432]/10 bg-[#F4F2ED]/95 backdrop-blur-md">
-        <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-10">
+      <div
+        className={`transition-all duration-300 ${
+          open || scrolled
+            ? "border-b border-[#303432]/10 bg-[#F4F2ED]/95 text-[#252925] shadow-[0_8px_30px_rgba(23,25,24,0.04)] backdrop-blur-xl"
+            : "border-b border-[#303432]/10 bg-[#F4F2ED]/90 text-[#252925] backdrop-blur-md"
+        }`}
+      >
+        <div className="mx-auto max-w-[1600px] px-5 sm:px-8 lg:px-12">
           <div className="flex h-[62px] items-center justify-between sm:h-[68px]">
             {/* Logo */}
             <Link
@@ -66,7 +83,7 @@ export function Navbar() {
               <img
                 src={logo}
                 alt="RafaBuildTec LLP"
-                className="h-11 w-auto max-w-[240px] shrink-0 object-contain sm:h-12 lg:h-[52px]"
+                className="h-10 w-auto max-w-[220px] shrink-0 object-contain sm:h-11 lg:h-12"
                 draggable="false"
               />
             </Link>
@@ -84,7 +101,7 @@ export function Navbar() {
                     key={item.path}
                     to={item.path}
                     aria-current={active ? "page" : undefined}
-                    className={`group relative py-2 text-[11px] transition-colors ${
+                    className={`group relative py-2 text-[11px] transition-colors duration-300 ${
                       active
                         ? "text-[#171918]"
                         : "text-[#4F5551] hover:text-[#171918]"
@@ -107,7 +124,7 @@ export function Navbar() {
             {/* Mobile menu button */}
             <button
               type="button"
-              className="relative flex h-10 w-10 shrink-0 items-center justify-center border border-[#303432]/15 md:hidden"
+              className="relative flex h-10 w-10 shrink-0 items-center justify-center border border-[#303432]/20 transition-colors duration-300 md:hidden"
               onClick={() => setOpen((value) => !value)}
               aria-label={open ? "Close navigation" : "Open navigation"}
               aria-expanded={open}
@@ -115,16 +132,13 @@ export function Navbar() {
             >
               <span
                 className={`absolute h-px w-[18px] bg-[#303432] transition-transform duration-300 ${
-                  open
-                    ? "translate-y-0 rotate-45"
-                    : "-translate-y-[4px]"
+                  open ? "translate-y-0 rotate-45" : "-translate-y-[4px]"
                 }`}
               />
+
               <span
                 className={`absolute h-px w-[18px] bg-[#303432] transition-transform duration-300 ${
-                  open
-                    ? "translate-y-0 -rotate-45"
-                    : "translate-y-[4px]"
+                  open ? "translate-y-0 -rotate-45" : "translate-y-[4px]"
                 }`}
               />
             </button>
@@ -154,10 +168,10 @@ export function Navbar() {
               duration: 0.35,
               ease: [0.22, 1, 0.36, 1],
             }}
-            className="absolute inset-x-0 top-full max-h-[calc(100svh-62px)] overflow-y-auto border-b border-[#303432]/10 bg-[#FAF9F6] md:hidden"
+            className="absolute inset-x-0 top-full max-h-[calc(100svh-62px)] overflow-y-auto border-b border-[#303432]/10 bg-[#FAF9F6] text-[#303432] shadow-xl shadow-black/5 md:hidden"
           >
             <nav
-              className="mx-auto max-w-[1440px] px-4 pb-5 sm:px-6"
+              className="mx-auto max-w-[1600px] px-5 pb-5 sm:px-8"
               aria-label="Mobile navigation"
             >
               <p className="pb-4 pt-6 text-[9px] font-semibold uppercase tracking-[0.28em] text-[#967A54]">
@@ -215,7 +229,7 @@ export function Navbar() {
 
               <div className="mt-6 border-t border-[#303432]/10 pt-5">
                 <p className="text-[8px] font-semibold uppercase tracking-[0.24em] text-[#967A54]">
-                  Construction & Infrastructure
+                  Construction &amp; Infrastructure
                 </p>
 
                 <p className="mt-2 max-w-[250px] text-[11px] leading-relaxed text-[#737874]">
@@ -231,137 +245,121 @@ export function Navbar() {
   );
 }
 
+
 /* =========================================================
-   SHARED FOOTER
+   SHARED FOOTER — MATCHES HOMEPAGE
 ========================================================= */
 
 export function Footer() {
-  return (
-    <footer className="relative overflow-hidden bg-[#171918] text-[#FAF9F6]">
-      {/* Architectural grid */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 opacity-[0.045]"
-        style={{
-          backgroundImage: `
-            linear-gradient(
-              to right,
-              rgba(255,255,255,0.8) 1px,
-              transparent 1px
-            ),
-            linear-gradient(
-              to bottom,
-              rgba(255,255,255,0.8) 1px,
-              transparent 1px
-            )
-          `,
-          backgroundSize: "72px 72px",
-        }}
-      />
+  const columns = [
+    {
+      title: "Company",
+      links: [
+        ["About", "/company"],
+        ["Leadership", "/leadership"],
+        ["Contact", "/contact"],
+      ],
+    },
+    {
+      title: "Capabilities",
+      links: [
+        ["Commercial", "/capabilities"],
+        ["Industrial", "/capabilities"],
+        ["Infrastructure", "/capabilities"],
+      ],
+    },
+    {
+      title: "Projects",
+      links: [["Project Archive", "/projects"]],
+    },
+  ];
 
-      <div className="relative mx-auto w-full max-w-[1440px] px-5 py-14 sm:px-7 sm:py-16 md:px-10 md:py-20 lg:px-14 lg:py-24">
-        {/* Footer top */}
-        <div className="grid gap-12 md:grid-cols-12 md:gap-8">
+  return (
+    <footer className="relative overflow-hidden border-t border-[#303432]/15 bg-[#F4F2ED] text-[#252A26]">
+      <div className="mx-auto max-w-[1600px] px-5 sm:px-8 lg:px-12">
+        {/* Main footer */}
+        <div className="grid gap-12 py-14 sm:py-16 lg:grid-cols-12 lg:gap-10 lg:py-20">
           {/* Brand */}
-          <div className="md:col-span-5">
+          <div className="lg:col-span-5">
             <Link
               to="/"
-              className="group inline-flex items-center gap-3"
               aria-label="RafaBuildTec home"
+              className="inline-flex items-center"
             >
-              <span className="flex h-10 w-10 items-center justify-center border border-white/15 text-[#967A54] transition-colors duration-300 group-hover:border-[#967A54]/50">
-                <Building2
-                  size={19}
-                  strokeWidth={1.4}
-                  aria-hidden="true"
-                />
-              </span>
-
-              <span>
-                <span className="block text-[17px] font-medium tracking-[-0.02em]">
-                  RafaBuildTec
-                </span>
-
-                <span className="mt-1 block text-[7px] font-semibold uppercase tracking-[0.25em] text-white/45">
-                  LLP
-                </span>
-              </span>
+              <img
+                src={logo}
+                alt="RafaBuildTec LLP"
+                className="h-12 w-auto max-w-[220px] object-contain object-left sm:h-14"
+              />
             </Link>
 
-            <p className="mt-7 max-w-md text-[13px] leading-[1.8] text-white/55">
-              Construction and infrastructure delivery built
-              around engineered systems, governance discipline,
-              and long-term asset performance.
-            </p>
-          </div>
-
-          {/* Navigation */}
-          <div className="md:col-span-3 md:col-start-7">
-            <p className="text-[9px] font-semibold uppercase tracking-[0.28em] text-[#967A54]">
-              Explore
+            <p className="mt-7 max-w-sm text-[13px] leading-[1.9] text-[#737874] sm:text-[14px]">
+              Construction and infrastructure delivery built around
+              engineering precision, responsible execution and
+              long-term performance.
             </p>
 
-            <div className="mt-5 grid gap-3">
-              {navigation.map((item) => (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  className="group inline-flex w-fit items-center gap-2 text-[11px] text-white/55 transition-colors duration-300 hover:text-white"
-                >
-                  {item.label}
-
-                  <ArrowUpRight
-                    size={11}
-                    strokeWidth={1.3}
-                    className="opacity-0 transition-all duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:opacity-100"
-                    aria-hidden="true"
-                  />
-                </Link>
-              ))}
+            <div className="mt-9 flex items-center gap-3">
+              <span className="h-px w-8 bg-[#967A54]" />
+              <p className="text-[9px] font-medium uppercase tracking-[0.22em] text-[#967A54]">
+                Engineered for permanence.
+              </p>
             </div>
           </div>
 
-          {/* Presence */}
-          <div className="md:col-span-3">
-            <p className="text-[9px] font-semibold uppercase tracking-[0.28em] text-[#967A54]">
-              Presence
-            </p>
+          {/* Navigation */}
+          <div className="grid grid-cols-2 gap-x-8 gap-y-10 sm:grid-cols-3 lg:col-span-6 lg:col-start-7 lg:gap-x-6">
+            {columns.map((column) => (
+              <div key={column.title}>
+                <h3 className="text-[9px] font-semibold uppercase tracking-[0.22em] text-[#967A54]">
+                  {column.title}
+                </h3>
 
-            <p className="mt-5 max-w-xs text-[11px] leading-[1.9] text-white/55">
-              Udupi
-              <span className="mx-2 text-white/20">/</span>
-              Mangalore
-              <span className="mx-2 text-white/20">/</span>
-              Bangalore
-              <span className="mx-2 text-white/20">/</span>
-              Goa
-              <span className="mx-2 text-white/20">/</span>
-              Hubli
-              <span className="mx-2 text-white/20">/</span>
-              Belgaum
-            </p>
+                <ul className="mt-5 space-y-4">
+                  {column.links.map(([label, href]) => (
+                    <li key={label}>
+                      <Link
+                        to={href}
+                        className="group inline-flex items-center text-[12px] text-[#555B56] transition-colors duration-200 hover:text-[#171918] sm:text-[13px]"
+                      >
+                        <span>{label}</span>
+                        <span
+                          aria-hidden="true"
+                          className="ml-1.5 -translate-x-1 opacity-0 transition-all duration-200 group-hover:translate-x-0 group-hover:opacity-60"
+                        >
+                          ↗
+                        </span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
           </div>
         </div>
 
-        {/* Large statement */}
-        <div className="mt-16 border-y border-white/[0.1] py-10 sm:mt-20 sm:py-12 md:mt-28 md:py-16">
-          <p className="text-[9px] font-semibold uppercase tracking-[0.28em] text-[#967A54]">
-            Operating Principle
-          </p>
-
-          <p className="mt-5 max-w-5xl text-[clamp(2.25rem,7vw,6rem)] font-light leading-[0.98] tracking-[-0.045em] text-white">
-            Engineered for permanence.
+        {/* Closing statement */}
+        <div className="border-y border-[#303432]/15 py-8 sm:py-10 lg:py-12">
+          <p className="max-w-4xl text-[clamp(1.8rem,4.5vw,3.6rem)] font-normal leading-[1.08] tracking-[-0.045em] text-[#252A26]">
+            Built with purpose.
+            <span className="text-[#898A80]">
+              {" "}Delivered with discipline.
+            </span>
           </p>
         </div>
 
-        {/* Footer bottom */}
-        <div className="flex flex-col gap-4 pt-7 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-[9px] uppercase tracking-[0.18em] text-white/35">
-            © {new Date().getFullYear()} RafaBuildTec LLP
+        {/* Bottom bar */}
+        <div className="flex flex-col gap-4 py-6 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
+          <p className="text-[9px] uppercase tracking-[0.13em] text-[#737874]">
+            © {new Date().getFullYear()} RafaBuildTec LLP. All rights reserved.
           </p>
 
-          <p className="text-[9px] uppercase tracking-[0.18em] text-white/35">
-            Construction & Infrastructure Delivery
+          <p className="text-[9px] uppercase tracking-[0.15em] text-[#737874]">
+            Udupi · Karnataka · India
+          </p>
+
+          <p className="text-[9px] uppercase tracking-[0.13em] text-[#737874]">
+            Construction &amp; Infrastructure
           </p>
         </div>
       </div>

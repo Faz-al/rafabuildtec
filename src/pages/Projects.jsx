@@ -94,7 +94,7 @@ function MobileFlagshipProjects({ projects, onOpen }) {
           transition={{ duration: 0.35, ease }}
           className="relative cursor-grab active:cursor-grabbing"
         >
-          <div className="relative aspect-[4/3] w-full overflow-hidden bg-[#DCD7CD]">
+          <div className="relative aspect-[5/4] w-full overflow-hidden bg-[#DCD7CD]">
             {images[imageIndex] ? (
               <img
                 src={images[imageIndex]}
@@ -272,7 +272,7 @@ function FlagshipProjectSelector({ projects, onOpen }) {
           >
             <div className="relative">
               <button type="button" onClick={() => onOpen(current)} className="block w-full text-left" aria-label={`View details for ${current.title}`}>
-                <div className="relative aspect-[1.55/1] max-h-[370px] overflow-hidden bg-[#DCD7CD]">
+                <div className="relative aspect-[1.48/1] max-h-[520px] overflow-hidden bg-[#DCD7CD]">
                   {images[imageIndex] ? (
                     <img src={images[imageIndex]} alt={`${current.title} — image ${imageIndex + 1}`} loading="lazy" className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.015]" />
                   ) : (
@@ -340,44 +340,63 @@ function OtherProjectRow({ project, index, onOpen }) {
   return (
     <motion.article
       variants={reveal}
-      className="group grid grid-cols-1 gap-4 border-t border-[#303432]/15 py-7 transition-colors duration-300 hover:bg-white/35 md:grid-cols-12 md:items-center md:gap-8 md:px-4 md:py-8"
+      className="group border-t border-[#303432]/15 py-5 sm:py-6 md:py-7"
     >
-      <div className="flex items-start gap-4 md:col-span-1">
-        <span className="font-mono text-[10px] text-[#947650]">
-          {String(index + 1).padStart(2, "0")}
-        </span>
-        <span className="mt-1 hidden h-px w-5 bg-[#303432]/20 md:block" />
-      </div>
-
-      <div className="md:col-span-5">
-        <p className="mb-2 text-[9px] uppercase tracking-[0.22em] text-[#947650]">
-          {project.location || "Project location"}
-        </p>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-[150px_minmax(0,1fr)] sm:items-center sm:gap-6 md:grid-cols-12 md:gap-8">
         <button
           type="button"
           onClick={() => onOpen(project)}
-          className="text-left text-[18px] leading-tight tracking-[-0.03em] text-[#252A26] transition-colors hover:text-[#947650] sm:text-[21px]"
+          aria-label={`View details for ${project.title}`}
+          className="group/image relative block aspect-[16/10] w-full overflow-hidden bg-[#E5E1D8] text-left sm:aspect-[4/3] md:col-span-3"
         >
-          {project.title}
+          {project.images?.[0] ? (
+            <img
+              src={project.images[0]}
+              alt={project.title || "RafaBuildTec project"}
+              loading="lazy"
+              className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover/image:scale-[1.04]"
+            />
+          ) : (
+            <div className="flex h-full items-center justify-center text-[9px] uppercase tracking-[0.2em] text-[#827B70]">
+              Project image
+            </div>
+          )}
+          <span className="absolute left-3 top-3 bg-[#F4F2ED]/90 px-2 py-1 font-mono text-[9px] text-[#303432]">
+            {String(index + 1).padStart(2, "0")}
+          </span>
         </button>
-        <p className="mt-2 text-[11px] text-[#77766F]">
-          {project.category || "Project"}
-          {project.scale ? `  /  ${project.scale}` : ""}
+
+        <div className="md:col-span-4">
+          <p className="mb-2 text-[9px] uppercase tracking-[0.2em] text-[#947650]">
+            {project.location || "Project location"}
+          </p>
+          <button
+            type="button"
+            onClick={() => onOpen(project)}
+            className="text-left text-[19px] leading-tight tracking-[-0.03em] text-[#252A26] transition-colors hover:text-[#947650] sm:text-[21px]"
+          >
+            {project.title}
+          </button>
+          <p className="mt-2 text-[10px] leading-5 text-[#77766F]">
+            {project.category || "Project"}
+            {project.scale ? `  /  ${project.scale}` : ""}
+          </p>
+        </div>
+
+        <p className="text-[12px] leading-6 text-[#5C625D] sm:text-[13px] sm:leading-7 md:col-span-4">
+          {project.description || "Planned and delivered with attention to coordination, quality and long-term performance."}
         </p>
-      </div>
 
-      <p className="text-[13px] leading-7 text-[#5C625D] md:col-span-4">
-        {project.description || "Planned and delivered with attention to coordination, quality and long-term performance."}
-      </p>
-
-      <div className="md:col-span-2 md:flex md:justify-end">
-        <button
-          type="button"
-          onClick={() => onOpen(project)}
-          className="inline-flex items-center gap-3 border-b border-[#947650]/60 pb-2 text-[9px] uppercase tracking-[0.18em] text-[#343A35] transition-colors hover:border-[#947650] hover:text-[#947650]"
-        >
-          View details <ArrowRight size={13} />
-        </button>
+        <div className="md:col-span-1 md:flex md:justify-end">
+          <button
+            type="button"
+            onClick={() => onOpen(project)}
+            aria-label={`View ${project.title}`}
+            className="inline-flex min-h-10 items-center gap-2 border-b border-[#947650]/60 pb-1 text-[9px] uppercase tracking-[0.16em] text-[#343A35] transition-colors hover:border-[#947650] hover:text-[#947650]"
+          >
+            Details <ArrowRight size={13} />
+          </button>
+        </div>
       </div>
     </motion.article>
   );
@@ -575,7 +594,8 @@ export default function Projects() {
     return matchesSearch && matchesCategory;
   });
   const totalPages = Math.ceil(filteredProjects.length / PAGE_SIZE);
-  const visibleProjects = filteredProjects.slice(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE);
+  const safePage = Math.min(page, Math.max(totalPages - 1, 0));
+  const visibleProjects = filteredProjects.slice(safePage * PAGE_SIZE, safePage * PAGE_SIZE + PAGE_SIZE);
 
   const changePage = (nextPage) => {
     setPage(Math.max(0, Math.min(nextPage, Math.max(totalPages - 1, 0))));
@@ -602,16 +622,16 @@ export default function Projects() {
             alt=""
             aria-hidden="true"
             fetchPriority="high"
-            className="h-full w-full object-cover object-center opacity-60"
+            className="h-full w-full object-cover object-[center_48%] opacity-50"
           />
           <div className="absolute inset-0 bg-gradient-to-r from-[#171A18]/90 via-[#171A18]/55 to-[#171A18]/15" />
           <div className="absolute inset-0 bg-gradient-to-t from-[#171A18]/70 via-transparent to-[#171A18]/20" />
         </div>
 
-        <div aria-hidden="true" className="pointer-events-none absolute inset-[14px] border border-white/15 sm:inset-6" />
-        <div aria-hidden="true" className="pointer-events-none absolute right-[12%] top-0 hidden h-full w-px bg-white/15 lg:block" />
+        
+        
 
-        <div className="relative mx-auto flex min-h-[430px] max-w-[1240px] flex-col justify-between px-7 pb-7 pt-12 sm:min-h-[480px] sm:px-10 sm:pb-9 sm:pt-16 lg:min-h-[510px] lg:px-12 lg:pb-10 lg:pt-20">
+        <div className="relative mx-auto flex min-h-[390px] max-w-[1320px] flex-col justify-between px-6 pb-6 pt-9 sm:min-h-[440px] sm:px-10 sm:pb-8 sm:pt-12 lg:min-h-[470px] lg:px-14 lg:pb-9 lg:pt-14">
           <motion.div
             initial="hidden"
             animate="show"
@@ -638,13 +658,13 @@ export default function Projects() {
               transition={{ duration: 0.75, delay: 0.1, ease }}
               className="lg:col-span-8"
             >
-              <p className="mb-4 text-[9px] font-medium uppercase tracking-[0.25em] text-[#D5BD9B] sm:mb-5 sm:text-[10px]">
+              <p className="mb-4 text-[9px] font-medium uppercase tracking-[0.22em] text-[#D5BD9B] sm:mb-4 sm:text-[10px]">
                 Selected work / Portfolio
               </p>
-              <h1 className="max-w-[800px] text-[clamp(2.8rem,6.4vw,6.1rem)] font-light leading-[0.9] tracking-[-0.065em] text-white">
-                Made with intent.
+              <h1 className="max-w-[800px] text-[clamp(2.7rem,5.8vw,5.5rem)] font-light leading-[0.94] tracking-[-0.055em] text-white">
+                Built with purpose.
                 <br />
-                <span className="text-white/65">Built to endure.</span>
+                <span className="text-white/65">Made to last.</span>
               </h1>
             </motion.div>
 
@@ -655,13 +675,13 @@ export default function Projects() {
               className="max-w-sm lg:col-span-4 lg:pb-1"
             >
               <p className="text-[12px] leading-6 text-white/80 sm:text-[13px] sm:leading-7">
-                Explore the thinking, craft and coordination behind our selected construction and infrastructure projects.
+                A closer look at the places we help bring to life.
               </p>
               <a
                 href="#selected-projects"
                 className="group mt-5 inline-flex min-h-11 items-center gap-5 border border-white/45 px-4 text-[9px] font-medium uppercase tracking-[0.17em] text-white transition-colors duration-300 hover:border-[#C5A77D] hover:bg-[#C5A77D] hover:text-[#202420] sm:mt-6"
               >
-                Explore selected work
+                View projects
                 <ArrowDownRight size={15} className="transition-transform duration-300 group-hover:translate-x-0.5 group-hover:translate-y-0.5" />
               </a>
             </motion.div>
@@ -671,7 +691,7 @@ export default function Projects() {
             <p className="text-[8px] uppercase tracking-[0.16em] text-white/75 sm:text-[9px] sm:tracking-[0.22em]">
               Planning <span className="mx-1.5 text-[#C5A77D]">/</span>
               Engineering <span className="mx-1.5 text-[#C5A77D]">/</span>
-              Execution
+              Delivery
             </p>
             <p className="shrink-0 font-mono text-[9px] text-white/70 sm:text-[10px]">RBT / 01</p>
           </div>
@@ -679,14 +699,14 @@ export default function Projects() {
       </section>
 
       {/* Flagship projects */}
-      <section id="selected-projects" className="relative bg-[#EAE7DF] px-5 py-14 sm:px-8 md:px-12 md:py-16">
+      <section id="selected-projects" className="relative bg-[#EAE7DF] px-5 py-12 sm:px-8 sm:py-14 md:px-12 md:py-[76px]">
         <div className="mx-auto max-w-[1240px]">
           <motion.div
             initial="hidden"
             whileInView="show"
             viewport={{ once: true, margin: "-80px" }}
             variants={{ hidden: {}, show: { transition: { staggerChildren: 0.12 } } }}
-            className="mb-10 grid gap-5 md:mb-14 md:grid-cols-12 md:items-end"
+            className="mb-8 grid gap-4 sm:mb-10 md:grid-cols-12 md:items-end"
           >
             <motion.div variants={reveal} className="md:col-span-7">
               <Eyebrow>01 / Featured projects</Eyebrow>
@@ -720,7 +740,7 @@ export default function Projects() {
       </section>
 
       {/* Extended portfolio */}
-      <section className="px-5 py-14 sm:px-8 md:px-12 md:py-20">
+      <section className="px-5 py-12 sm:px-8 sm:py-14 md:px-12 md:py-[76px]">
         <div className="mx-auto max-w-[1240px]">
           <div className="mb-9 grid gap-6 md:mb-12 md:grid-cols-12 md:items-end">
             <div className="md:col-span-7">
@@ -817,23 +837,23 @@ export default function Projects() {
               {totalPages > 1 && (
                 <div className="mt-8 flex flex-col gap-5 border-t border-[#303432]/15 pt-5 sm:flex-row sm:items-center sm:justify-between">
                   <p className="font-mono text-[10px] text-[#77766F]">
-                    {String(page * PAGE_SIZE + 1).padStart(2, "0")}–{String(Math.min((page + 1) * PAGE_SIZE, otherProjects.length)).padStart(2, "0")}
+                    {String(safePage * PAGE_SIZE + 1).padStart(2, "0")}–{String(Math.min((safePage + 1) * PAGE_SIZE, filteredProjects.length)).padStart(2, "0")}
                     <span className="mx-2 text-[#B4ADA0]">/</span>
                     {String(otherProjects.length).padStart(2, "0")} projects
                   </p>
                   <div className="flex items-center gap-2">
                     <button
                       type="button"
-                      onClick={() => changePage(page - 1)}
-                      disabled={page === 0}
+                      onClick={() => changePage(safePage - 1)}
+                      disabled={safePage === 0}
                       className="flex h-11 items-center gap-2 border border-[#303432]/20 px-4 text-[9px] uppercase tracking-[0.16em] transition-colors hover:bg-[#303432] hover:text-white disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:bg-transparent disabled:hover:text-[#252A26]"
                     >
                       <ArrowLeft size={13} /> Previous
                     </button>
                     <button
                       type="button"
-                      onClick={() => changePage(page + 1)}
-                      disabled={page >= totalPages - 1}
+                      onClick={() => changePage(safePage + 1)}
+                      disabled={safePage >= totalPages - 1}
                       className="flex h-11 items-center gap-2 border border-[#303432]/20 px-4 text-[9px] uppercase tracking-[0.16em] transition-colors hover:bg-[#303432] hover:text-white disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:bg-transparent disabled:hover:text-[#252A26]"
                     >
                       Next <ArrowRight size={13} />
@@ -859,7 +879,7 @@ export default function Projects() {
       </section>
 
       {/* Contact close */}
-      <section className="relative overflow-hidden bg-[#242925] px-5 py-14 text-[#F4F2ED] sm:px-8 md:px-12 md:py-20">
+      <section className="relative overflow-hidden bg-[#242925] px-5 py-12 text-[#F4F2ED] sm:px-8 sm:py-14 md:px-12 md:py-[76px]">
         <div aria-hidden="true" className="pointer-events-none absolute -right-16 -top-24 h-72 w-72 rounded-full border border-white/10" />
         <div className="relative mx-auto grid max-w-[1240px] gap-10 md:grid-cols-12 md:items-end">
           <div className="md:col-span-8">
