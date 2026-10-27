@@ -553,18 +553,22 @@ export default function Projects() {
   useEffect(() => {
     let mounted = true;
 
-    sanityClient
-      .fetch(`
-        *[_type == "project" && published == true] | order(order asc) {
-          title,
-          projectType,
-          location,
-          category,
-          scale,
-          description,
-          "images": images[].asset->url
-        }
-      `)
+    
+sanityClient
+  .fetch(`
+    *[_type == "project" && published == true] | order(order asc) {
+      _id,
+      title,
+      "slug": slug.current,
+      projectType,
+      location,
+      category,
+      scale,
+      description,
+      "images": images[].asset->url
+    }
+  `)
+
       .then((data) => {
         if (!mounted) return;
         const projects = Array.isArray(data) ? data : [];

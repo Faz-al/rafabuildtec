@@ -13,6 +13,20 @@ export default defineType({
       type: "string",
       validation: (Rule) => Rule.required(),
     }),
+
+    
+defineField({
+  name: "slug",
+  title: "Project URL Slug",
+  type: "slug",
+  options: {
+    source: "title",
+    maxLength: 96,
+  },
+  validation: (Rule) => Rule.required(),
+}),
+
+
     defineField({
       name: "location",
       title: "Location",
