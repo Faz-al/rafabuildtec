@@ -43,9 +43,9 @@ const contactDetails = [
   {
     number: "03",
     label: "Telephone",
-    value: "+91 XXX XXX XXXX",
+    value: "+91 9986613986",
     href: null,
-    note: "Replace with the official contact number",
+    
     Icon: Phone,
   },
   {
