@@ -340,10 +340,21 @@ function Navbar() {
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
-    const updateScroll = () => setScrolled(window.scrollY > 24);
+    // Keep the hero mark and navbar mark in a coordinated cross-fade.
+    const updateScroll = () => {
+      const handoffPoint = window.innerWidth < 768 ? 72 : 125;
+      const nextScrolled = window.scrollY > handoffPoint;
+      setScrolled(nextScrolled);
+      document.body.classList.toggle("rb-logo-scrolled", nextScrolled);
+    };
     updateScroll();
     window.addEventListener("scroll", updateScroll, { passive: true });
-    return () => window.removeEventListener("scroll", updateScroll);
+    window.addEventListener("resize", updateScroll);
+    return () => {
+      window.removeEventListener("scroll", updateScroll);
+      window.removeEventListener("resize", updateScroll);
+      document.body.classList.remove("rb-logo-scrolled");
+    };
   }, []);
 
   useEffect(() => {
@@ -373,24 +384,35 @@ function Navbar() {
   return (
     <header className="fixed inset-x-0 top-0 z-[100]">
       <div
-        className={`transition-all duration-300 ${
-          open || scrolled
-            ? "border-b border-[#303432]/10 bg-[#F4F2ED]/95 text-[#252925] shadow-[0_8px_30px_rgba(23,25,24,0.04)] backdrop-blur-xl"
-            : "border-b border-white/20 bg-transparent text-white"
+        className={`border-b text-white transition-[background-color,border-color,box-shadow,backdrop-filter] duration-[850ms] ease-[cubic-bezier(.22,1,.36,1)] ${
+          open || scrolled ? "text-[#252925]" : "text-white"
         }`}
+        style={{
+          backgroundColor: open || scrolled
+            ? "rgba(244, 242, 237, 0.96)"
+            : "rgba(244, 242, 237, 0)",
+          borderColor: open || scrolled
+            ? "rgba(48, 52, 50, 0.10)"
+            : "rgba(255, 255, 255, 0.20)",
+          boxShadow: open || scrolled
+            ? "0 8px 30px rgba(23, 25, 24, 0.04)"
+            : "0 0 0 rgba(23, 25, 24, 0)",
+          backdropFilter: open || scrolled ? "blur(18px)" : "blur(0px)",
+          WebkitBackdropFilter: open || scrolled ? "blur(18px)" : "blur(0px)",
+        }}
       >
         <div className="mx-auto max-w-[1600px] px-5 sm:px-8 lg:px-12">
           <div className="flex h-[62px] items-center justify-between sm:h-[68px]">
             <Link
               to="/"
               onClick={() => setOpen(false)}
-              className="flex min-w-0 items-center"
+              className="rb-navbar-brand flex min-w-0 items-center pointer-events-none"
               aria-label="RafaBuildTec LLP — Home"
             >
               <img
                 src={logo}
                 alt="RafaBuildTec LLP"
-                className="h-10 w-auto max-w-[220px] shrink-0 object-contain sm:h-11 lg:h-12"
+                className="h-12 w-12 shrink-0 object-contain"
                 draggable="false"
               />
             </Link>
@@ -400,7 +422,7 @@ function Navbar() {
                 <Link
                   key={label}
                   to={href}
-                  className={`group relative py-2 text-[11px] transition-colors duration-300 ${
+                  className={`group relative py-2 text-[11px] transition-colors duration-700 ${
                     open || scrolled
                       ? "text-[#4F5551] hover:text-[#171918]"
                       : "text-white/85 hover:text-white"
@@ -507,17 +529,22 @@ function ArchitecturalHero() {
         className="pointer-events-none absolute inset-3 border border-white/15 sm:inset-5 lg:inset-7"
       />
 
-      <div className="relative mx-auto flex min-h-[min(760px,100svh)] max-w-[1600px] flex-col px-7 pb-7 pt-24 sm:min-h-[min(820px,100svh)] sm:px-12 sm:pb-10 sm:pt-32 lg:min-h-[760px] lg:px-16 lg:pb-12 lg:pt-36">
+      <div className="relative mx-auto flex min-h-[min(760px,100svh)] max-w-[1600px] flex-col px-5 pb-7 pt-24 sm:min-h-[min(820px,100svh)] sm:px-8 sm:pb-10 sm:pt-32 lg:min-h-[760px] lg:px-12 lg:pb-12 lg:pt-36">
         {/* Minimal brand line */}
         <motion.div
           initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, ease }}
-          className="flex items-center justify-between gap-4"
+          className="rb-hero-brand flex items-center justify-between gap-4"
         >
-          <div className="flex items-center gap-3">
-            <span className="h-px w-7 bg-[#C3A47B] sm:w-10" />
-            <span className="text-[9px] font-medium uppercase tracking-[0.2em] text-white/90 sm:text-[10px] sm:tracking-[0.28em]">
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            <img
+              src={logo}
+              alt="RafaBuildTec logo"
+              className="h-12 w-12 shrink-0 object-contain"
+              draggable="false"
+            />
+            <span className="text-[9px] font-semibold uppercase tracking-[0.18em] text-white sm:text-[10px] sm:tracking-[0.24em]">
               RafaBuildTec LLP
             </span>
           </div>
@@ -528,14 +555,14 @@ function ArchitecturalHero() {
         </motion.div>
 
         {/* Hero message */}
-        <div className="flex flex-1 flex-col justify-end pb-9 pt-16 sm:pb-16 sm:pt-20 lg:pb-20">
+        <div className="flex flex-1 flex-col justify-end pb-12 pt-16 sm:pb-16 sm:pt-20 lg:pb-20">
           <motion.div
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.9, delay: 0.1, ease }}
             className="max-w-[1050px]"
           >
-            <p className="mb-5 text-[9px] font-medium uppercase tracking-[0.25em] text-[#D5BB98] sm:mb-7 sm:text-[10px] sm:tracking-[0.32em]">
+            <p className="mb-4 text-[8px] font-medium uppercase tracking-[0.24em] text-[#D5BB98] sm:mb-7 sm:text-[10px] sm:tracking-[0.32em]">
               Built with purpose
             </p>
 
@@ -546,7 +573,7 @@ function ArchitecturalHero() {
             </h1>
 
             <div className="mt-6 flex max-w-[700px] flex-col gap-6 sm:mt-8 sm:flex-row sm:items-end sm:justify-between sm:gap-10">
-              <p className="max-w-[340px] text-[12px] leading-6 text-white/80 sm:text-[13px] sm:leading-7">
+              <p className="hidden max-w-[340px] text-[12px] leading-6 text-white/80 sm:block sm:text-[13px] sm:leading-7">
                 Thoughtfully planned. Precisely engineered. Built with
                 accountability at every stage.
               </p>
@@ -567,7 +594,7 @@ function ArchitecturalHero() {
         </div>
 
         {/* Bottom signature */}
-        <div className="flex items-center justify-between gap-3 border-t border-white/25 pt-4">
+        <div className="hidden items-center justify-between gap-3 border-t border-white/25 pt-4 sm:flex">
           <p className="text-[8px] uppercase tracking-[0.12em] text-white/65 sm:text-[9px] sm:tracking-[0.2em]">
             Engineering
             <span className="mx-1.5 text-[#C3A47B]">/</span>
@@ -600,7 +627,7 @@ function ArchitecturalHero() {
 
 function Manifesto() {
   return (
-    <section className="relative overflow-hidden bg-[#FAF9F6] py-14 sm:py-20 lg:py-28">
+    <section className="relative overflow-hidden bg-[#FAF9F6] py-9 sm:py-20 lg:py-28">
       <div className="mx-auto max-w-[1440px] px-5 sm:px-8 lg:px-10">
         <div className="grid gap-9 lg:grid-cols-12 lg:gap-10">
           {/* Section identifier */}
@@ -633,9 +660,12 @@ function Manifesto() {
                 Execution delivers certainty.
               </span>
             </h2>
+            <p className="mt-4 text-[11px] leading-5 text-[#737874] sm:hidden">
+              Planned with precision. Delivered with accountability.
+            </p>
 
             {/* Supporting information */}
-            <div className="mt-10 grid gap-8 border-t border-[#303432]/15 pt-7 sm:mt-12 sm:grid-cols-2 sm:gap-10 sm:pt-9 lg:mt-14">
+            <div className="mt-10 hidden gap-8 border-t border-[#303432]/15 pt-7 sm:mt-12 sm:grid sm:grid-cols-2 sm:gap-10 sm:pt-9 lg:mt-14">
               <div>
                 <p className="mb-3 text-[10px] font-medium uppercase tracking-[0.18em] text-[#967A54]">
                   Our Approach
@@ -1017,7 +1047,7 @@ return (
             </div>
 
             {/* Compact project information */}
-            <aside className="flex min-w-0 flex-col border border-t-0 border-[#252A26]/15 bg-[#F1F0EA] p-5 sm:p-6 lg:border-l-0 lg:border-t lg:p-5 xl:p-6">
+            <aside className="flex min-w-0 flex-col border border-t-0 border-[#252A26]/15 bg-[#F1F0EA] p-4 sm:p-6 lg:border-l-0 lg:border-t lg:p-5 xl:p-6">
               <div className="flex items-center justify-between gap-3">
                 <span className="text-[9px] uppercase tracking-[0.15em] text-[#777C75]">
                   Project overview
@@ -1034,7 +1064,7 @@ return (
                 About the project
               </p>
 
-              <p className="text-[12px] leading-[1.8] text-[#565D56] sm:text-[13px]">
+              <p className="line-clamp-3 text-[12px] leading-[1.7] text-[#565D56] sm:line-clamp-none sm:text-[13px] sm:leading-[1.8]">
                 {project.description ||
                   "A considered approach to construction, technical coordination and long-term project performance."}
               </p>
@@ -1051,7 +1081,7 @@ return (
                 </p>
               </div>
 
-              <div className="mt-3 grid grid-cols-[70px_minmax(0,1fr)] gap-3 py-1">
+              <div className="mt-2 grid grid-cols-[64px_minmax(0,1fr)] gap-3 py-0.5 sm:mt-3 sm:py-1">
                 <p className="text-[9px] uppercase tracking-[0.1em] text-[#777C75]">
                   Sector
                 </p>
@@ -1062,7 +1092,7 @@ return (
               </div>
 
               {project.scale && (
-                <div className="mt-3 grid grid-cols-[70px_minmax(0,1fr)] gap-3 py-1">
+                <div className="mt-2 grid grid-cols-[64px_minmax(0,1fr)] gap-3 py-0.5 sm:mt-3 sm:py-1">
                   <p className="text-[9px] uppercase tracking-[0.1em] text-[#777C75]">
                     Scale
                   </p>
@@ -1408,11 +1438,11 @@ function CapabilityCard({ item, index }) {
           </h3>
         </div>
 
-        <p className="mt-2.5 max-w-[390px] text-[12px] leading-[1.8] text-[#686D67] sm:text-[13px]">
+        <p className="mt-2 max-w-[390px] line-clamp-2 text-[11px] leading-[1.6] text-[#686D67] sm:mt-2.5 sm:line-clamp-none sm:text-[13px] sm:leading-[1.8]">
           {item.desc}
         </p>
 
-        <div className="mt-5 flex items-center gap-2">
+        <div className="mt-3 hidden items-center gap-2 sm:mt-5 sm:flex">
           <span className="h-px w-5 bg-[#967A54]" />
           <span className="text-[9px] uppercase tracking-[0.15em] text-[#777970]">
             Engineered delivery
@@ -1458,7 +1488,7 @@ function CapabilityBands() {
   return (
     <section
       id="capabilities"
-      className="relative overflow-hidden bg-[#F4F2ED] py-14 sm:py-20 lg:py-24"
+      className="relative overflow-hidden bg-[#F4F2ED] py-9 sm:py-20 lg:py-24"
     >
       <TechnicalCorner className="right-8 top-8 hidden sm:block lg:right-10 lg:top-10" />
 
@@ -1469,7 +1499,7 @@ function CapabilityBands() {
           whileInView="show"
           variants={reveal}
           viewport={viewport}
-          className="mb-9 flex flex-col gap-5 sm:mb-12 lg:mb-14 lg:flex-row lg:items-end lg:justify-between lg:gap-12"
+          className="mb-6 flex flex-col gap-3 sm:mb-12 lg:mb-14 lg:flex-row lg:items-end lg:justify-between lg:gap-12"
         >
           <div className="max-w-[620px]">
             <SectionLabel number="">Core Capabilities</SectionLabel>
@@ -1483,7 +1513,7 @@ function CapabilityBands() {
             </h2>
           </div>
 
-          <p className="max-w-[340px] text-[13px] leading-[1.85] text-[#686D67] lg:pb-1">
+          <p className="hidden max-w-[340px] text-[13px] leading-[1.85] text-[#686D67] sm:block lg:pb-1">
             From complex buildings to critical infrastructure, every project
             is guided by buildability, technical coordination and lasting
             quality.
@@ -1507,7 +1537,7 @@ function CapabilityBands() {
             <div
               key={item.type}
               className="
-                w-[88%] min-w-0 max-w-[390px] shrink-0 snap-start
+                w-[82%] min-w-0 max-w-[390px] shrink-0 snap-start
                 sm:w-[62%]
                 md:w-auto md:max-w-none md:shrink
               "
@@ -1543,6 +1573,41 @@ function CapabilityBands() {
 }
 
 
+
+
+function MobileEssentials() {
+  const items = [
+    ["01", "Plan", "Clear scope & cost"],
+    ["02", "Engineer", "Coordinated design"],
+    ["03", "Deliver", "Quality-led execution"],
+  ];
+
+  return (
+    <section className="border-y border-[#303432]/10 bg-[#E8E6E0] py-7 md:hidden">
+      <div className="mx-auto max-w-[1320px] px-5 sm:px-8">
+        <div className="mb-5 flex items-end justify-between gap-4">
+          <div>
+            <p className="text-[8px] uppercase tracking-[0.2em] text-[#967A54]">Our approach</p>
+            <h2 className="mt-1 text-[23px] font-light tracking-[-0.04em] text-[#252A26]">One team. Every stage.</h2>
+          </div>
+          <span className="pb-1 text-[8px] uppercase tracking-[0.14em] text-[#777970]">RafaBuildTec</span>
+        </div>
+        <div className="grid grid-cols-3 border-y border-[#303432]/15">
+          {items.map(([number, title, detail], index) => (
+            <div key={number} className={`min-w-0 py-4 ${index ? "border-l border-[#303432]/15 pl-3" : "pr-2"} ${index === 1 ? "px-3" : ""}`}>
+              <span className="text-[8px] tracking-[0.14em] text-[#967A54]">{number}</span>
+              <p className="mt-2 text-[13px] font-medium text-[#303432]">{title}</p>
+              <p className="mt-1 text-[9px] leading-4 text-[#737874]">{detail}</p>
+            </div>
+          ))}
+        </div>
+        <p className="mt-4 text-[9px] uppercase tracking-[0.12em] text-[#737874]">
+          Quality <span className="mx-1 text-[#967A54]">·</span> Safety <span className="mx-1 text-[#967A54]">·</span> Accountability
+        </p>
+      </div>
+    </section>
+  );
+}
 
 
 function GovernanceDiagram() {
@@ -1777,7 +1842,7 @@ function GovernanceSafety() {
   ];
 
   return (
-    <section className="relative overflow-hidden bg-[#E8E6E0] py-14 sm:py-20 lg:py-24">
+    <section className="relative hidden overflow-hidden bg-[#E8E6E0] py-14 sm:py-20 lg:py-24 md:block">
       <GridTexture opacity={0.018} size={140} />
 
       <div className="relative mx-auto max-w-[1320px] px-5 sm:px-8 lg:px-12">
@@ -1972,7 +2037,7 @@ function DeliveryFramework() {
   };
 
   return (
-    <section className="relative overflow-hidden bg-[#FAF9F6] py-14 sm:py-20 lg:py-24">
+    <section className="relative hidden overflow-hidden bg-[#FAF9F6] py-14 sm:py-20 lg:py-24 md:block">
       <TechnicalCorner className="right-6 top-8 sm:right-10 sm:top-10" />
 
       <div className="mx-auto max-w-[1320px] px-5 sm:px-8 lg:px-12">
@@ -2392,7 +2457,7 @@ function GeographicPresence() {
   const activeIndex = locations.findIndex((location) => location.name === active);
 
   return (
-    <section id="regional-presence" className="relative overflow-hidden bg-[#E8E6E0] py-14 sm:py-20 lg:py-28">
+    <section id="regional-presence" className="relative hidden overflow-hidden bg-[#E8E6E0] py-14 sm:py-20 lg:py-28 md:block">
       <GridTexture opacity={0.018} size={170} />
 
       <div className="relative mx-auto max-w-[1440px] px-5 sm:px-8 lg:px-12">
@@ -2481,7 +2546,7 @@ function GeographicPresence() {
                     type="button"
                     aria-pressed={isActive}
                     onClick={() => setActive(location.name)}
-                    className={`flex min-h-[112px] flex-col items-center justify-center border-b border-r border-[#303432]/12 px-1.5 py-3 text-center transition-colors duration-200 ${isActive ? "bg-[#F2F0EA]/90" : "bg-transparent active:bg-[#F2F0EA]/60"}`}
+                    className={`flex min-h-[88px] sm:min-h-[112px] flex-col items-center justify-center border-b border-r border-[#303432]/12 px-1.5 py-2.5 sm:py-3 text-center transition-colors duration-200 ${isActive ? "bg-[#F2F0EA]/90" : "bg-transparent active:bg-[#F2F0EA]/60"}`}
                   >
                     <LocationIcon type={location.icon} active={isActive} />
                     <span className={`mt-2 text-[11px] tracking-[-.02em] ${isActive ? "font-medium text-[#303432]" : "font-normal text-[#454A46]"}`}>
@@ -2656,7 +2721,7 @@ function Timeline() {
   return (
     <section
       id="our-journey"
-      className="relative overflow-hidden bg-[#F4F2ED] py-14 sm:py-20 lg:py-28"
+      className="relative hidden overflow-hidden bg-[#F4F2ED] py-14 sm:py-20 lg:py-28 md:block"
     >
       <div className="mx-auto max-w-[1440px] px-5 sm:px-8 lg:px-12">
         {/* Section heading */}
@@ -2693,7 +2758,7 @@ function Timeline() {
             {/* Continuous timeline rail */}
             <div className="absolute bottom-8 left-[17px] top-5 w-px bg-[#303432]/15" />
 
-            <div className="space-y-7">
+            <div className="space-y-5 sm:space-y-7">
               {history.map((item, index) => (
                 <motion.article
                   key={item.year}
@@ -2713,7 +2778,7 @@ function Timeline() {
 
                   {/* Milestone content */}
                   <div
-                    className={`min-w-0 border-b pb-6 ${
+                    className={`min-w-0 border-b pb-4 sm:pb-6 ${
                       item.current
                         ? "border-[#967A54]/40"
                         : "border-[#303432]/12"
@@ -3015,7 +3080,7 @@ function TrustSection() {
   return (
     <section
       id="who-we-work-with"
-      className="relative overflow-hidden border-t border-[#303432]/10 bg-[#FAF9F6] py-14 sm:py-20 lg:py-28"
+      className="relative hidden overflow-hidden border-t border-[#303432]/10 bg-[#FAF9F6] py-14 sm:py-20 lg:py-28 md:block"
     >
       <div className="mx-auto max-w-[1440px] px-5 sm:px-8 lg:px-12">
         {/* Editorial heading */}
@@ -3138,13 +3203,14 @@ function EnquirySection() {
   return (
     <section
       id="project-enquiries"
-      className="relative overflow-hidden bg-[#E8E6E0] py-14 sm:py-20 lg:py-28"
+      className="relative overflow-hidden bg-[#E8E6E0] py-10 sm:py-20 lg:py-28"
     >
       <GridTexture opacity={0.025} size={140} />
 
       <div className="relative mx-auto max-w-[1440px] px-5 sm:px-8 lg:px-12">
-        <div className="grid items-start gap-10 lg:grid-cols-12 lg:items-end lg:gap-16">
-          {/* Left — editorial heading */}
+        <div className="grid items-start gap-8 sm:gap-10 lg:grid-cols-12 lg:items-end lg:gap-16">
+
+          {/* Left — Editorial heading */}
           <motion.div
             initial="hidden"
             whileInView="show"
@@ -3223,7 +3289,7 @@ function EnquirySection() {
             </div>
           </motion.div>
 
-          {/* Right — contact panel */}
+          {/* Right — Contact panel */}
           <motion.div
             initial="hidden"
             whileInView="show"
@@ -3232,6 +3298,8 @@ function EnquirySection() {
             className="min-w-0 lg:col-span-5"
           >
             <div className="border border-[#303432]/12 bg-[#FAF9F6] p-5 sm:p-8 lg:p-9">
+
+              {/* Panel heading */}
               <div className="flex items-start justify-between gap-4 border-b border-[#303432]/12 pb-5 sm:pb-6">
                 <div>
                   <p className="text-[9px] uppercase tracking-[.22em] text-[#967A54]">
@@ -3272,8 +3340,8 @@ function EnquirySection() {
 
               {/* Email */}
               <a
-                href="mailto:projects@rafabuildtec.com"
-                className="group flex items-center justify-between gap-4 border-b border-[#303432]/12 py-5 sm:py-6"
+                href="mailto:rafabuildtecllp@gmail.com"
+                className="group flex items-center justify-between gap-4 border-b border-[#303432]/12 py-4 sm:py-5"
               >
                 <div className="min-w-0">
                   <p className="text-[9px] uppercase tracking-[.17em] text-[#737874]">
@@ -3281,7 +3349,7 @@ function EnquirySection() {
                   </p>
 
                   <p className="mt-2 break-all text-[14px] font-light tracking-[-.02em] text-[#303432] transition-colors group-hover:text-[#967A54] sm:text-base">
-                    projects@rafabuildtec.com
+                    rafabuildtecllp@gmail.com
                   </p>
                 </div>
 
@@ -3301,38 +3369,72 @@ function EnquirySection() {
                 </svg>
               </a>
 
-              {/* Telephone — replace placeholder when confirmed */}
-              <div className="flex items-center justify-between gap-4 border-b border-[#303432]/12 py-5 sm:py-6">
-                <div>
+              {/* Telephone — both numbers */}
+              <div className="border-b border-[#303432]/12 py-4 sm:py-5">
+                <div className="flex items-center justify-between gap-4">
                   <p className="text-[9px] uppercase tracking-[.17em] text-[#737874]">
                     Telephone
                   </p>
 
-                  <p className="mt-2 text-sm font-light text-[#737874] sm:text-base">
-                    Contact via email
-                  </p>
+                  <span className="text-[8px] uppercase tracking-[.14em] text-[#967A54]">
+                    Direct Contact
+                  </span>
                 </div>
 
-                <svg
-                  viewBox="0 0 20 20"
-                  className="h-5 w-5 shrink-0 text-[#967A54]"
-                  fill="none"
-                  aria-hidden="true"
-                >
-                  <path
-                    d="M5 3H8L10 7L7.8 8.8C9 11.2 10.8 13 13.2 14.2L15 12L19 14V17C19 18 18 19 17 19C8.7 18.5 1.5 11.3 1 3C1 2 2 1 3 1H5V3Z"
-                    stroke="currentColor"
-                    strokeWidth="1.1"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    transform="translate(0 0) scale(.9)"
-                  />
-                </svg>
+                <div className="mt-3 space-y-3">
+                  <a
+                    href="tel:+919986613986"
+                    className="group flex items-center justify-between gap-4"
+                  >
+                    <span className="text-[15px] font-light tracking-[-.02em] text-[#303432] transition-colors group-hover:text-[#967A54] sm:text-base">
+                      +91 99866 13986
+                    </span>
+
+                    <svg
+                      viewBox="0 0 20 20"
+                      className="h-4 w-4 shrink-0 text-[#967A54] transition-transform duration-300 group-hover:translate-x-1"
+                      fill="none"
+                      aria-hidden="true"
+                    >
+                      <path
+                        d="M4 10H16M10 4L16 10L10 16"
+                        stroke="currentColor"
+                        strokeWidth="1.2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </a>
+
+                  <a
+                    href="tel:+919986473270"
+                    className="group flex items-center justify-between gap-4"
+                  >
+                    <span className="text-[15px] font-light tracking-[-.02em] text-[#303432] transition-colors group-hover:text-[#967A54] sm:text-base">
+                      +91 99864 73270
+                    </span>
+
+                    <svg
+                      viewBox="0 0 20 20"
+                      className="h-4 w-4 shrink-0 text-[#967A54] transition-transform duration-300 group-hover:translate-x-1"
+                      fill="none"
+                      aria-hidden="true"
+                    >
+                      <path
+                        d="M4 10H16M10 4L16 10L10 16"
+                        stroke="currentColor"
+                        strokeWidth="1.2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </a>
+                </div>
               </div>
 
               {/* Primary action */}
               <Link
-                to="/contact"
+                to="/contact#enquiry"
                 className="group mt-6 flex min-h-[54px] w-full items-center justify-between gap-4 bg-[#967A54] px-5 py-4 text-[#FAF9F6] transition-colors duration-300 hover:bg-[#7C6240] sm:mt-7"
               >
                 <span className="text-[9px] uppercase tracking-[.19em] sm:text-[10px]">
@@ -3360,6 +3462,7 @@ function EnquirySection() {
                 and potential partnerships.
               </p>
 
+              {/* Brand signature */}
               <div className="mt-5 flex items-center gap-2 border-t border-[#303432]/10 pt-4">
                 <span className="h-1.5 w-1.5 bg-[#967A54]" />
                 <span className="text-[8px] uppercase tracking-[.16em] text-[#92958F]">
@@ -3407,7 +3510,7 @@ function EnterpriseFooter() {
     <footer className="relative overflow-hidden border-t border-[#303432]/15 bg-[#F4F2ED] text-[#252A26]">
       <div className="mx-auto max-w-[1600px] px-5 sm:px-8 lg:px-12">
         {/* Main footer */}
-        <div className="grid gap-12 py-14 sm:py-16 lg:grid-cols-12 lg:gap-10 lg:py-20">
+        <div className="grid gap-9 py-10 sm:gap-12 sm:py-16 lg:grid-cols-12 lg:gap-10 lg:py-20">
           {/* Brand */}
           <div className="lg:col-span-5">
             <Link
@@ -3422,13 +3525,13 @@ function EnterpriseFooter() {
 />
             </Link>
 
-            <p className="mt-7 max-w-sm text-[13px] leading-[1.9] text-[#737874] sm:text-[14px]">
+            <p className="mt-4 max-w-sm text-[12px] leading-[1.7] text-[#737874] sm:mt-7 sm:text-[14px] sm:leading-[1.9]">
               Construction and infrastructure delivery built around
               engineering precision, responsible execution and
               long-term performance.
             </p>
 
-            <div className="mt-9 flex items-center gap-3">
+            <div className="mt-5 flex items-center gap-3 sm:mt-9">
               <span className="h-px w-8 bg-[#967A54]" />
               <p className="text-[9px] font-medium uppercase tracking-[0.22em] text-[#967A54]">
                 Engineered for permanence.
@@ -3437,14 +3540,14 @@ function EnterpriseFooter() {
           </div>
 
           {/* Navigation */}
-          <div className="grid grid-cols-2 gap-x-8 gap-y-10 sm:grid-cols-3 lg:col-span-6 lg:col-start-7 lg:gap-x-6">
+          <div className="grid grid-cols-2 gap-x-6 gap-y-6 sm:grid-cols-3 sm:gap-x-8 sm:gap-y-10 lg:col-span-6 lg:col-start-7 lg:gap-x-6">
             {columns.map((column) => (
               <div key={column.title}>
                 <h3 className="text-[9px] font-semibold uppercase tracking-[0.22em] text-[#967A54]">
                   {column.title}
                 </h3>
 
-                <ul className="mt-5 space-y-4">
+                <ul className="mt-3 space-y-2.5 sm:mt-5 sm:space-y-4">
                   {column.links.map(([label, href]) => (
                     <li key={label}>
                       <Link
@@ -3468,7 +3571,7 @@ function EnterpriseFooter() {
         </div>
 
         {/* Closing statement */}
-        <div className="border-y border-[#303432]/15 py-8 sm:py-10 lg:py-12">
+        <div className="border-y border-[#303432]/15 py-5 sm:py-10 lg:py-12">
           <p className="max-w-4xl text-[clamp(1.8rem,4.5vw,3.6rem)] font-normal leading-[1.08] tracking-[-0.045em] text-[#252A26]">
             Built with purpose.
             <span className="text-[#898A80]"> Delivered with discipline.</span>
@@ -3476,7 +3579,7 @@ function EnterpriseFooter() {
         </div>
 
         {/* Bottom bar */}
-        <div className="flex flex-col gap-4 py-6 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
+        <div className="flex flex-col gap-2 py-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6 sm:py-6">
           <p className="text-[9px] uppercase tracking-[0.13em] text-[#737874]">
             © {new Date().getFullYear()} RafaBuildTec LLP. All rights reserved.
           </p>
@@ -3502,12 +3605,100 @@ function EnterpriseFooter() {
 export default function Home() {
   return (
     <div
-      className="min-h-screen overflow-x-clip bg-[#F4F2ED] text-[#171918]"
+      className="rb-home min-h-screen overflow-x-clip bg-[#F4F2ED] text-[#171918]"
       style={{
         fontFamily:
           "Manrope, DM Sans, Inter, ui-sans-serif, system-ui, sans-serif",
       }}
     >
+
+      <style>{`
+        .rb-home {
+          -webkit-font-smoothing: antialiased;
+          text-rendering: optimizeLegibility;
+        }
+        .rb-home .rb-hero-brand,
+        .rb-home .rb-navbar-brand {
+          transition: opacity 720ms cubic-bezier(.22, 1, .36, 1),
+                      transform 720ms cubic-bezier(.22, 1, .36, 1);
+          will-change: opacity, transform;
+        }
+        .rb-home .rb-hero-brand {
+          opacity: 1;
+          transform: translateY(0);
+        }
+        .rb-home .rb-navbar-brand {
+          opacity: 0;
+          transform: translateY(-5px);
+        }
+        body.rb-logo-scrolled .rb-home .rb-hero-brand {
+          opacity: 0;
+          transform: translateY(-7px);
+          pointer-events: none;
+        }
+        body.rb-logo-scrolled .rb-home .rb-navbar-brand {
+          opacity: 1;
+          transform: translateY(0);
+          pointer-events: auto;
+        }
+        .rb-home img {
+          -webkit-user-drag: none;
+        }
+        .rb-home a:focus-visible,
+        .rb-home button:focus-visible {
+          outline: 2px solid #967A54;
+          outline-offset: 4px;
+        }
+        .rb-home ::selection {
+          color: #FAF9F6;
+          background: #7C6240;
+        }
+        @media (max-width: 767px) {
+          .rb-home main > section:not(:first-child) {
+            padding-top: 2.75rem !important;
+            padding-bottom: 2.75rem !important;
+          }
+          .rb-home main > section:first-child {
+            min-height: min(740px, 94svh);
+          }
+          .rb-home main > section h2 {
+            text-wrap: balance;
+          }
+          .rb-home main > section p {
+            text-wrap: pretty;
+          }
+          .rb-home main > section .mb-9 {
+            margin-bottom: 1.5rem;
+          }
+          .rb-home main > section .mt-14 {
+            margin-top: 2rem;
+          }
+          .rb-home main > section .mt-12 {
+            margin-top: 1.75rem;
+          }
+          .rb-home main > section .pt-12 {
+            padding-top: 1.75rem;
+          }
+          .rb-home footer .space-y-4 > :not([hidden]) ~ :not([hidden]) {
+            margin-top: .7rem;
+          }
+        }
+        @media (min-width: 768px) and (max-width: 1023px) {
+          .rb-home main > section:not(:first-child) {
+            scroll-margin-top: 5rem;
+          }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .rb-home *,
+          .rb-home *::before,
+          .rb-home *::after {
+            scroll-behavior: auto !important;
+            animation-duration: .01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: .01ms !important;
+          }
+        }
+      `}</style>
       <Navbar />
 
       <main>
@@ -3515,6 +3706,7 @@ export default function Home() {
         <Manifesto />
         <ProjectsShowcase />
         <CapabilityBands />
+        <MobileEssentials />
         <GovernanceSafety />
         <DeliveryFramework />
         <GeographicPresence />

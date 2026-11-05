@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { motion } from "framer-motion";
 import {
   ArrowDownRight,
@@ -12,49 +12,44 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { Navbar, Footer } from "../components/Layout";
+import { useLocation } from "react-router-dom";
 
 /*
-CONTACT PAGE — PREMIUM INSTITUTIONAL
+CONTACT PAGE — RAFA BUILD TEC LLP
 Warm architectural stone palette · responsive · restrained motion
-
-Before publishing:
-- Replace the placeholder phone number with the official business number.
-- Connect the form to your backend / email service. This page currently validates
-  required fields in the browser but does not send enquiries to a server.
+The enquiry form prepares a WhatsApp message for the RafaBuildTec team.
 */
 
 const contactDetails = [
   {
     number: "01",
     label: "Project enquiries",
-    value: "projects@rafabuildtec.com",
-    href: "mailto:projects@rafabuildtec.com",
+    value: "rafabuildtecllp@gmail.com",
+    href: "mailto:rafabuildtecllp@gmail.com",
+    action: "Send an email",
     note: "Project scope, proposals and delivery discussions",
     Icon: Mail,
   },
   {
     number: "02",
-    label: "Institutional discussions",
-    value: "info@rafabuildtec.com",
-    href: "mailto:info@rafabuildtec.com",
-    note: "Partnerships, organisations and general enquiries",
-    Icon: Building2,
-  },
-  {
-    number: "03",
     label: "Telephone",
-    value: "+91 9986613986",
-    href: null,
-    
+    values: ["+91 99866 13986", "+91 99864 73270"],
+    note: "Speak directly with the RafaBuildTec team",
     Icon: Phone,
   },
   {
-    number: "04",
+    number: "03",
     label: "Office",
     value: "Udupi, Karnataka, India",
-    href: null,
-    note: "Serving project stakeholders with clarity and accountability",
+    note: "Serving project stakeholders across the region",
     Icon: MapPin,
+  },
+  {
+    number: "04",
+    label: "Engagement",
+    value: "Projects · Partnerships · Institutions",
+    note: "For organisations, developers and project stakeholders",
+    Icon: Building2,
   },
 ];
 
@@ -72,6 +67,22 @@ const inputClass =
   "mt-3 w-full rounded-xl border border-[#D9D5CE] bg-[#FAF9F6] px-4 py-4 text-[14px] text-[#202A30] outline-none transition placeholder:text-[#9A9A94] hover:border-[#B9A78F] focus:border-[#8A6F4E] focus:ring-4 focus:ring-[#8A6F4E]/10 md:px-5";
 
 export default function Contact() {
+  const location = useLocation();
+
+  useEffect(() => {
+    if (!location.hash) return;
+
+    const targetId = decodeURIComponent(location.hash.slice(1));
+    const timer = window.setTimeout(() => {
+      document.getElementById(targetId)?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }, 120);
+
+    return () => window.clearTimeout(timer);
+  }, [location.pathname, location.hash]);
+
   return (
     <main className="overflow-hidden bg-[#F3F1EC] text-[#202A30]">
       <Navbar />
@@ -143,9 +154,9 @@ function Hero() {
 /* ================= CONTACT DETAILS ================= */
 function ContactGrid() {
   return (
-    <section className="border-y border-[#D8D4CC] bg-[#E9E6DF] py-14 sm:py-20 md:py-24">
+    <section className="border-y border-[#D8D4CC] bg-[#E9E6DF] py-12 sm:py-20 md:py-24">
       <div className="mx-auto max-w-7xl px-5 sm:px-8 md:px-12">
-        <div className="mb-9 flex items-end justify-between gap-5 sm:mb-12">
+        <div className="mb-8 flex flex-col gap-4 sm:mb-11 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="mb-3 text-[10px] font-medium uppercase tracking-[0.3em] text-[#8A6F4E]">
               Reach the right team
@@ -154,31 +165,41 @@ function ContactGrid() {
               A direct line to <span className="font-medium">RafaBuildTec.</span>
             </h2>
           </div>
-          <p className="hidden max-w-xs text-right text-sm leading-6 text-[#70736F] md:block">
+          <p className="max-w-xs text-sm leading-6 text-[#70736F] sm:text-right">
             Clear communication from the first discussion.
           </p>
         </div>
 
         <div className="grid grid-cols-1 border-l border-t border-[#D3CEC5] sm:grid-cols-2 lg:grid-cols-4">
-          {contactDetails.map(({ number, label, value, href, note, Icon }, index) => {
+          {contactDetails.map(({ number, label, value, values, href, action, note, Icon }, index) => {
             const content = (
               <>
-                <div className="mb-9 flex items-center justify-between">
-                  <span className="text-[10px] tracking-[0.22em] text-[#8A6F4E]">
-                    {number}
-                  </span>
+                <div className="mb-7 flex items-center justify-between sm:mb-9">
+                  <span className="text-[10px] tracking-[0.22em] text-[#8A6F4E]">{number}</span>
                   <Icon size={18} strokeWidth={1.4} className="text-[#8A6F4E]" />
                 </div>
-                <p className="text-[10px] font-medium uppercase tracking-[0.2em] text-[#777A75]">
-                  {label}
-                </p>
-                <p className="mt-3 break-words text-base font-medium leading-6 text-[#202A30] sm:text-[17px]">
-                  {value}
-                </p>
+                <p className="text-[10px] font-medium uppercase tracking-[0.2em] text-[#777A75]">{label}</p>
+
+                {values ? (
+                  <div className="mt-3 space-y-2">
+                    {values.map((phone) => (
+                      <a
+                        key={phone}
+                        href={`tel:${phone.replace(/\\s/g, "")}`}
+                        className="block text-base font-medium leading-6 text-[#202A30] transition-colors hover:text-[#8A6F4E] sm:text-[17px]"
+                      >
+                        {phone}
+                      </a>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="mt-3 break-words text-base font-medium leading-6 text-[#202A30] sm:text-[17px]">{value}</p>
+                )}
+
                 <p className="mt-3 text-xs leading-5 text-[#777A75]">{note}</p>
-                {href && (
+                {(href || values) && (
                   <span className="mt-5 inline-flex items-center gap-2 text-xs font-medium text-[#8A6F4E]">
-                    Send an email <ArrowRight size={13} />
+                    {action || "Call now"} <ArrowRight size={13} />
                   </span>
                 )}
               </>
@@ -191,13 +212,10 @@ function ContactGrid() {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: index * 0.07 }}
                 viewport={{ once: true, amount: 0.2 }}
-                className="border-b border-r border-[#D3CEC5] p-5 sm:p-7 md:p-8"
+                className="border-b border-r border-[#D3CEC5] p-5 transition-colors duration-300 hover:bg-[#F3F1EC]/60 sm:p-7 md:p-8"
               >
                 {href ? (
-                  <a
-                    href={href}
-                    className="group block h-full rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-[#8A6F4E] focus-visible:ring-offset-4"
-                  >
+                  <a href={href} className="group block h-full rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-[#8A6F4E] focus-visible:ring-offset-4">
                     {content}
                   </a>
                 ) : (
@@ -228,28 +246,29 @@ function EnquiryForm() {
     const projectType = String(data.get("projectType") || "").trim();
     const overview = String(data.get("overview") || "").trim();
 
-    const subject = encodeURIComponent(`Project enquiry — ${name}`);
-    const body = encodeURIComponent(
-      [
-        "New project enquiry for RafaBuildTec",
-        "",
-        `Name: ${name}`,
-        `Organisation: ${organisation || "Not provided"}`,
-        `Email: ${email}`,
-        `Phone: ${phone || "Not provided"}`,
-        `Project type: ${projectType}`,
-        "",
-        "Project overview:",
-        overview,
-      ].join("\n")
-    );
+    const message = [
+      "Hello RafaBuildTec team, I'd like to discuss a project.",
+      "",
+      "PROJECT ENQUIRY",
+      `Name: ${name}`,
+      `Organisation: ${organisation || "Not provided"}`,
+      `Email: ${email}`,
+      `Phone: ${phone || "Not provided"}`,
+      `Project type: ${projectType}`,
+      "",
+      "PROJECT OVERVIEW:",
+      overview,
+    ].join("\n");
 
-    // Opens the visitor's email application; it does not submit to a server.
-    window.location.href = `mailto:projects@rafabuildtec.com?subject=${subject}&body=${body}`;
+    const whatsappUrl = `https://wa.me/919986613986?text=${encodeURIComponent(message)}`;
+
+    // Opens WhatsApp with all enquiry details pre-filled. The visitor reviews
+    // the message and presses Send in WhatsApp.
+    window.open(whatsappUrl, "_blank", "noopener,noreferrer");
   };
 
   return (
-    <section id="enquiry" className="py-16 sm:py-24 md:py-32">
+    <section id="enquiry" className="scroll-mt-24 py-14 sm:py-20 md:py-28">
       <div className="mx-auto grid max-w-7xl grid-cols-1 gap-12 px-5 sm:px-8 md:grid-cols-12 md:gap-16 md:px-12 lg:gap-24">
         <motion.div
           initial={{ opacity: 0, y: 18 }}
@@ -404,7 +423,7 @@ function EnquiryForm() {
                   type="submit"
                   className="group flex w-full items-center justify-between gap-4 rounded-full bg-[#202A30] px-6 py-4 text-left text-sm font-medium text-white transition duration-300 hover:bg-[#8A6F4E] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#8A6F4E]/25 sm:w-auto sm:min-w-56 sm:px-7"
                 >
-                  <span>Prepare enquiry email</span>
+                  <span>Send enquiry on WhatsApp</span>
                   <ArrowRight
                     size={17}
                     className="transition-transform duration-300 group-hover:translate-x-1"
@@ -412,8 +431,7 @@ function EnquiryForm() {
                 </button>
                 <p className="mt-4 flex items-start gap-2 text-xs leading-5 text-[#777A75]">
                   <Clock3 size={14} className="mt-0.5 shrink-0" />
-                  Your email app will open with the enquiry details ready to
-                  review and send.
+                  WhatsApp will open with your enquiry details ready to review and send.
                 </p>
               </div>
             </form>
